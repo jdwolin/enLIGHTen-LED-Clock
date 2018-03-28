@@ -25,7 +25,7 @@ WS2812FX strip = WS2812FX(NUMLEDS, PIN, NEO_GRB + NEO_KHZ800);
 WS2812FX stripsecs = WS2812FX(NUMLEDSECS, PINS, NEO_GRB + NEO_KHZ800);
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
-// variables
+
 void tick()
 {
   int state = digitalRead(BUILTIN_LED);  // get the current state of GPIO1 pin
