@@ -11,3 +11,5 @@ Here are a few features:  The clock syncs every minute with a timeserver ensurin
 Special holiday modes can add festivity to your house during Halloween, New Years or Christmas. We even have a special mode for pi day where the clock animates the digits of pi for 100 digits every hour.
 
 The CNC source files are available on instructables.com as well as all the build instructions.  
+
+
