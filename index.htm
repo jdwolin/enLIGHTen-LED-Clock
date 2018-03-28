@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Title here -->
+    <title>Dashboard - EnLightEn Configuration</title>
+    <!-- Description, Keywords and Author -->
+    <!-- Styles -->
+    <!-- Bootstrap CSS -->
+    <link href="http://brightlightart.com/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery gritter -->
+    <link href="http://brightlightart.com/css/less-style.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="http://brightlightart.com/css/style.css" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="http://brightlightart.com/css/materialize.min.css" media="screen,projection" />
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="#">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta charset="utf-8" />
+    <title>Clock Configuration Page</title>
+</head>
+
+<body>
+    <nav class="blue light-blueXXX lighten-1XXX" role="navigation" id="mc-nav">
+        <div class="nav-wrapper container">
+            <a id="logo-container" href="#" class="brand-logo">Clock Configuration</a>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+
+    <div class="container mc_pane" id="pane0">
+        <div class="section">
+            <div class="row" id="mc-wsloader">
+                <div class="col">
+                    <div class="preloader-wrapper active">
+                        <div class="spinner-layer spinner-blue-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row hide" id="mc-wserror">
+                <div class="col">
+                    <div>Error on websocket connect.</div>
+                </div>
+            </div>
+        </div>
+        <!-- error loading pane  -->
+    </div>
+
+    <!-- Settings pane  -->
+    <div class="container mc_pane hide" id="pane1">
+        <div class="mainbar">
+            <div class="container">
+
+                <!-- Settings Widget -->
+                <div class="row">
+                    <div class="col-md-5">
+                        <!-- Project widget -->
+                        <div class="widget pages-widget">
+                            <div class="widget-head br-green">
+                                <h3><img src="http://brightlightart.com/img/settings.png" height="36">General Settings</h3>
+                            </div>
+
+                            <div class="widget-body">
+                                <div class="row settings-head">
+                                    <label>After 8pm Lower Brightness by 50%</label>
+                                    <div class="right switch">
+                                        <label>Off 
+																<input id="dimSwitch" type="checkbox"><span class="lever"></span>On 
+															</label></div>
+                                </div>
+                                <div class="row settings-head">
+                                    <label>Show Minute Hand Arc</label>
+                                    <div class="right switch">
+                                        <label>Off 
+																<input id="arcSwitch" type="checkbox"><span class="lever"></span>On 
+															</label></div>
+                                </div>
+
+                                <div class="row settings-head">
+                                    <label>Turn Second Hand On/Off</label>
+                                    <div class="right switch">
+                                        <label>Off 
+																<input id="secondhandswitch" type="checkbox"><span class="lever"></span>On 
+															</label></div>
+                                </div>
+
+                                <div class="row settings-head">
+                                    <label>Automatically Adjust for Daylight Savings</label>
+                                    <div class="right switch">
+                                        <label>Off 
+																<input id="daylightSwitch" type="checkbox"><span class="lever"></span>On 
+															</label></div>
+                                </div>
+                                <div class="row settings-head">
+                                    <label>Select Appropriate Time Zone</label>
+    <select id="location" name="location" class="form-control">
+	<option timeZoneId="1" gmtAdjustment="GMT-12:00" useDaylightTime="0" value="-12">(GMT-12:00) International Date Line West</option>
+	<option timeZoneId="2" gmtAdjustment="GMT-11:00" useDaylightTime="0" value="-11">(GMT-11:00) Midway Island, Samoa</option>
+	<option timeZoneId="3" gmtAdjustment="GMT-10:00" useDaylightTime="0" value="-10">(GMT-10:00) Hawaii</option>
+	<option timeZoneId="4" gmtAdjustment="GMT-09:00" useDaylightTime="1" value="-9">(GMT-09:00) Alaska</option>
+	<option timeZoneId="5" gmtAdjustment="GMT-08:00" useDaylightTime="1" value="-8">(GMT-08:00) Pacific Time (US & Canada)</option>
+	<option timeZoneId="6" gmtAdjustment="GMT-08:00" useDaylightTime="1" value="-8">(GMT-08:00) Tijuana, Baja California</option>
+	<option timeZoneId="7" gmtAdjustment="GMT-07:00" useDaylightTime="0" value="-7">(GMT-07:00) Arizona</option>
+	<option timeZoneId="8" gmtAdjustment="GMT-07:00" useDaylightTime="1" value="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
+	<option timeZoneId="9" gmtAdjustment="GMT-07:00" useDaylightTime="1" value="-7">(GMT-07:00) Mountain Time (US & Canada)</option>
+	<option timeZoneId="10" gmtAdjustment="GMT-06:00" useDaylightTime="0" value="-6">(GMT-06:00) Central America</option>
+	<option timeZoneId="11" gmtAdjustment="GMT-06:00" useDaylightTime="1" value="-6">(GMT-06:00) Central Time (US & Canada)</option>
+	<option timeZoneId="12" gmtAdjustment="GMT-06:00" useDaylightTime="1" value="-6">(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
+	<option timeZoneId="13" gmtAdjustment="GMT-06:00" useDaylightTime="0" value="-6">(GMT-06:00) Saskatchewan</option>
+	<option timeZoneId="14" gmtAdjustment="GMT-05:00" useDaylightTime="0" value="-5">(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
+	<option timeZoneId="15" gmtAdjustment="GMT-05:00" useDaylightTime="1" value="-5">(GMT-05:00) Eastern Time (US & Canada)</option>
+	<option timeZoneId="16" gmtAdjustment="GMT-05:00" useDaylightTime="1" value="-5">(GMT-05:00) Indiana (East)</option>
+	<option timeZoneId="17" gmtAdjustment="GMT-04:00" useDaylightTime="1" value="-4">(GMT-04:00) Atlantic Time (Canada)</option>
+	<option timeZoneId="18" gmtAdjustment="GMT-04:00" useDaylightTime="0" value="-4">(GMT-04:00) Caracas, La Paz</option>
+	<option timeZoneId="19" gmtAdjustment="GMT-04:00" useDaylightTime="0" value="-4">(GMT-04:00) Manaus</option>
+	<option timeZoneId="20" gmtAdjustment="GMT-04:00" useDaylightTime="1" value="-4">(GMT-04:00) Santiago</option>
+	<option timeZoneId="21" gmtAdjustment="GMT-03:30" useDaylightTime="1" value="-3.5">(GMT-03:30) Newfoundland</option>
+	<option timeZoneId="22" gmtAdjustment="GMT-03:00" useDaylightTime="1" value="-3">(GMT-03:00) Brasilia</option>
+	<option timeZoneId="23" gmtAdjustment="GMT-03:00" useDaylightTime="0" value="-3">(GMT-03:00) Buenos Aires, Georgetown</option>
+	<option timeZoneId="24" gmtAdjustment="GMT-03:00" useDaylightTime="1" value="-3">(GMT-03:00) Greenland</option>
+	<option timeZoneId="25" gmtAdjustment="GMT-03:00" useDaylightTime="1" value="-3">(GMT-03:00) Montevideo</option>
+	<option timeZoneId="26" gmtAdjustment="GMT-02:00" useDaylightTime="1" value="-2">(GMT-02:00) Mid-Atlantic</option>
+	<option timeZoneId="27" gmtAdjustment="GMT-01:00" useDaylightTime="0" value="-1">(GMT-01:00) Cape Verde Is.</option>
+	<option timeZoneId="28" gmtAdjustment="GMT-01:00" useDaylightTime="1" value="-1">(GMT-01:00) Azores</option>
+	<option timeZoneId="29" gmtAdjustment="GMT+00:00" useDaylightTime="0" value="0">(GMT+00:00) Casablanca, Monrovia, Reykjavik</option>
+	<option timeZoneId="30" gmtAdjustment="GMT+00:00" useDaylightTime="1" value="0">(GMT+00:00) Greenwich Mean Time : Dublin, Edinburgh, Lisbon, London</option>
+	<option timeZoneId="31" gmtAdjustment="GMT+01:00" useDaylightTime="1" value="1">(GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna</option>
+	<option timeZoneId="32" gmtAdjustment="GMT+01:00" useDaylightTime="1" value="1">(GMT+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague</option>
+	<option timeZoneId="33" gmtAdjustment="GMT+01:00" useDaylightTime="1" value="1">(GMT+01:00) Brussels, Copenhagen, Madrid, Paris</option>
+	<option timeZoneId="34" gmtAdjustment="GMT+01:00" useDaylightTime="1" value="1">(GMT+01:00) Sarajevo, Skopje, Warsaw, Zagreb</option>
+	<option timeZoneId="35" gmtAdjustment="GMT+01:00" useDaylightTime="1" value="1">(GMT+01:00) West Central Africa</option>
+	<option timeZoneId="36" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Amman</option>
+	<option timeZoneId="37" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Athens, Bucharest, Istanbul</option>
+	<option timeZoneId="38" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Beirut</option>
+	<option timeZoneId="39" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Cairo</option>
+	<option timeZoneId="40" gmtAdjustment="GMT+02:00" useDaylightTime="0" value="2">(GMT+02:00) Harare, Pretoria</option>
+	<option timeZoneId="41" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius</option>
+	<option timeZoneId="42" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Jerusalem</option>
+	<option timeZoneId="43" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Minsk</option>
+	<option timeZoneId="44" gmtAdjustment="GMT+02:00" useDaylightTime="1" value="2">(GMT+02:00) Windhoek</option>
+	<option timeZoneId="45" gmtAdjustment="GMT+03:00" useDaylightTime="0" value="3">(GMT+03:00) Kuwait, Riyadh, Baghdad</option>
+	<option timeZoneId="46" gmtAdjustment="GMT+03:00" useDaylightTime="1" value="3">(GMT+03:00) Moscow, St. Petersburg, Volgograd</option>
+	<option timeZoneId="47" gmtAdjustment="GMT+03:00" useDaylightTime="0" value="3">(GMT+03:00) Nairobi</option>
+	<option timeZoneId="48" gmtAdjustment="GMT+03:00" useDaylightTime="0" value="3">(GMT+03:00) Tbilisi</option>
+	<option timeZoneId="49" gmtAdjustment="GMT+03:30" useDaylightTime="1" value="3.5">(GMT+03:30) Tehran</option>
+	<option timeZoneId="50" gmtAdjustment="GMT+04:00" useDaylightTime="0" value="4">(GMT+04:00) Abu Dhabi, Muscat</option>
+	<option timeZoneId="51" gmtAdjustment="GMT+04:00" useDaylightTime="1" value="4">(GMT+04:00) Baku</option>
+	<option timeZoneId="52" gmtAdjustment="GMT+04:00" useDaylightTime="1" value="4">(GMT+04:00) Yerevan</option>
+	<option timeZoneId="53" gmtAdjustment="GMT+04:30" useDaylightTime="0" value="4.5">(GMT+04:30) Kabul</option>
+	<option timeZoneId="54" gmtAdjustment="GMT+05:00" useDaylightTime="1" value="5">(GMT+05:00) Yekaterinburg</option>
+	<option timeZoneId="55" gmtAdjustment="GMT+05:00" useDaylightTime="0" value="5">(GMT+05:00) Islamabad, Karachi, Tashkent</option>
+	<option timeZoneId="56" gmtAdjustment="GMT+05:30" useDaylightTime="0" value="5.5">(GMT+05:30) Sri Jayawardenapura</option>
+	<option timeZoneId="57" gmtAdjustment="GMT+05:30" useDaylightTime="0" value="5.5">(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
+	<option timeZoneId="58" gmtAdjustment="GMT+05:45" useDaylightTime="0" value="5.75">(GMT+05:45) Kathmandu</option>
+	<option timeZoneId="59" gmtAdjustment="GMT+06:00" useDaylightTime="1" value="6">(GMT+06:00) Almaty, Novosibirsk</option>
+	<option timeZoneId="60" gmtAdjustment="GMT+06:00" useDaylightTime="0" value="6">(GMT+06:00) Astana, Dhaka</option>
+	<option timeZoneId="61" gmtAdjustment="GMT+06:30" useDaylightTime="0" value="6.5">(GMT+06:30) Yangon (Rangoon)</option>
+	<option timeZoneId="62" gmtAdjustment="GMT+07:00" useDaylightTime="0" value="7">(GMT+07:00) Bangkok, Hanoi, Jakarta</option>
+	<option timeZoneId="63" gmtAdjustment="GMT+07:00" useDaylightTime="1" value="7">(GMT+07:00) Krasnoyarsk</option>
+	<option timeZoneId="64" gmtAdjustment="GMT+08:00" useDaylightTime="0" value="8">(GMT+08:00) Beijing, Chongqing, Hong Kong, Urumqi</option>
+	<option timeZoneId="65" gmtAdjustment="GMT+08:00" useDaylightTime="0" value="8">(GMT+08:00) Kuala Lumpur, Singapore</option>
+	<option timeZoneId="66" gmtAdjustment="GMT+08:00" useDaylightTime="0" value="8">(GMT+08:00) Irkutsk, Ulaan Bataar</option>
+	<option timeZoneId="67" gmtAdjustment="GMT+08:00" useDaylightTime="0" value="8">(GMT+08:00) Perth</option>
+	<option timeZoneId="68" gmtAdjustment="GMT+08:00" useDaylightTime="0" value="8">(GMT+08:00) Taipei</option>
+	<option timeZoneId="69" gmtAdjustment="GMT+09:00" useDaylightTime="0" value="9">(GMT+09:00) Osaka, Sapporo, Tokyo</option>
+	<option timeZoneId="70" gmtAdjustment="GMT+09:00" useDaylightTime="0" value="9">(GMT+09:00) Seoul</option>
+	<option timeZoneId="71" gmtAdjustment="GMT+09:00" useDaylightTime="1" value="9">(GMT+09:00) Yakutsk</option>
+	<option timeZoneId="72" gmtAdjustment="GMT+09:30" useDaylightTime="0" value="9.5">(GMT+09:30) Adelaide</option>
+	<option timeZoneId="73" gmtAdjustment="GMT+09:30" useDaylightTime="0" value="9.5">(GMT+09:30) Darwin</option>
+	<option timeZoneId="74" gmtAdjustment="GMT+10:00" useDaylightTime="0" value="10">(GMT+10:00) Brisbane</option>
+	<option timeZoneId="75" gmtAdjustment="GMT+10:00" useDaylightTime="1" value="10">(GMT+10:00) Canberra, Melbourne, Sydney</option>
+	<option timeZoneId="76" gmtAdjustment="GMT+10:00" useDaylightTime="1" value="10">(GMT+10:00) Hobart</option>
+	<option timeZoneId="77" gmtAdjustment="GMT+10:00" useDaylightTime="0" value="10">(GMT+10:00) Guam, Port Moresby</option>
+	<option timeZoneId="78" gmtAdjustment="GMT+10:00" useDaylightTime="1" value="10">(GMT+10:00) Vladivostok</option>
+	<option timeZoneId="79" gmtAdjustment="GMT+11:00" useDaylightTime="1" value="11">(GMT+11:00) Magadan, Solomon Is., New Caledonia</option>
+	<option timeZoneId="80" gmtAdjustment="GMT+12:00" useDaylightTime="1" value="12">(GMT+12:00) Auckland, Wellington</option>
+	<option timeZoneId="81" gmtAdjustment="GMT+12:00" useDaylightTime="0" value="12">(GMT+12:00) Fiji, Kamchatka, Marshall Is.</option>
+	<option timeZoneId="82" gmtAdjustment="GMT+13:00" useDaylightTime="0" value="13">(GMT+13:00) Nuku'alofa</option>
+</select>
+                                </div>
+                            </div>
+                            <div class="widget-foot">
+                                <span class="pull-left"><i class="fa fa-time"></i>General Settings and Config</span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Color Wheel  -->
+                    <div class="col-md-7">
+                        <!-- Project widget -->
+                        <div class="widget pages-widget">
+                            <div class="widget-head br-green">
+                                <h3><img src="http://brightlightart.com/img/bulb.png">Color Customization - Changes Update Immediately </h3>
+                            </div>
+                            <div class="widget-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="col s12 m12 l12 btn_grid" style="height: 330px; width: 330px;">
+                                            <canvas id="myCanvas" width="330" height="330" style="-webkit-user-select: none;-webkit-tap-highlight-color: rgba(0,0,0,0);-moz-user-select:none; text-align:-webkit-center;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="numcolor" data-mode="numcolor">Number Color</a>
+                                        </div>
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="hrcolor" data-mode="hrcolor">Hour Number</a>
+                                        </div>
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="mindotcolor" data-mode="mindotcolor">Minute Hand Dot</a>
+                                        </div>
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="secdotcolor" data-mode="secdotcolor">Second Hand Dot</a>
+                                        </div>
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="sweepcolor" data-mode="sweepcolor">Sweeping Color</a>
+                                        </div>
+                                        <div class="col s12 m12 l12 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_color blue" name="action" id="altcolor" data-mode="altcolor">Event Color</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="widget-foot">
+                                <span class="pull-left"><i class="fa fa-time"></i>Use Buttons to the Right to Change Clock Colors (No Save Needed)</span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Clock Mode  -->
+                    <div class="col-md-3">
+                        <!-- Pages widget -->
+                        <div class="widget pages-widget">
+
+                            <div class="widget-head br-green">
+                                <h3><img src="http://brightlightart.com/img/clock.png"></i>Clock Mode</h3>
+                            </div>
+                            <div class="widget-body">
+                                <div class="row">
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton1" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="justaminute">Just a Minute</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton2" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="bumpme">Bump Me</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton3" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="pendulum">Pendulum</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton4" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="chasetails">Chase Tails</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton5" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="notails">Chase</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton6" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="minimalist">Minimalist</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton7" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="perpetualmotion">Perpetual Motion</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton8" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="falling">Falling</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton9" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="springs">Springs</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton10" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="fountain">Fountain</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton11" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="living">Living</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton12" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="stars">Stars</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton13" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="hope">Hope</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton14" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="hope">Peace</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="widget-foot">
+                                <span class="pull-left"><i class="fa fa-time"></i>Outer Ring Modes</span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+
+
+                    <!-- Special Effects  -->
+
+                    <div class="col-md-9">
+                        <!-- Home chart widget -->
+                        <div class="widget pages-widget">
+                            <div class="widget-head br-green">
+                                <h3 class="pull-left"><img src=http://brightlightart.com/img/color.png>Select Special Effects to Include in Number Animations</h3>
+                                <div class="clearfix"></div>
+                            </div>
+
+
+                            <div class="widget-body">
+                <!-- Brightness and Speed -->
+                <div class="row">
+                    <form class="col s12">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <label for="txt_delay">Speed</label><br/>
+                                <p class="range-field"><input type="range" id="rng_delay" min="0" max="255" value="196" class="update_delay" /></p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <label for="txt_delay">Brightness</label><br/>
+                                <p class="range-field"><input type="range" id="rng_brightness" min="0" max="255" value="196" class="update_brightness" /></p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                                <div class="row">
+                                    <div id="modes">
+                                        <div class="input-field col s12">
+                                            Loading animations...
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="widget-foot">
+                                <span class="pull-left"><i class="fa fa-time"></i>Modes Updated Automatically (no save needed)</span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- Settings   -->
+
+
+    <!-- Playground  -->
+
+
+    <footer class="page-footer blue">
+        <div class="footer-copyright">
+            <div class="container">© 2018
+                <a class="grey-text text-lighten-4 right" href="http://brightlightart.com">Bright Light Studio Homepage</a>
+            </div>
+        </div>
+    </footer>
+
+    <style type="text/css">
+        .btn_grid {
+        				margin: 7px 0;
+        			}
+    </style>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <script type="text/javascript">
+        (function($){
+        $(function(){
+        	var thecolor = 0;
+        	var dimflag = 0;
+        	// Settings
+        	var host = window.location.hostname;
+        	//host = "esp8266_02.local";
+        
+        	var ws_url = 'ws://' + host + ':81';
+        	var connection;
+        	var ws_waiting = 0;
+        	var colormode = "maincolor";
+        	// ******************************************************************
+        	// Side navigation
+        	// ******************************************************************
+            $('.button-collapse').sideNav();
+        	
+        	// Navlinks
+        	$('#mc-nav').on('click', '.mc-navlink', function(){
+        		console.log("Navigate to pane: ", $(this).data("pane"));
+        		showPane($(this).data("pane"));
+        	});
+        	
+        	function showPane(pane) {
+        		$('.mc_pane').addClass('hide');
+        		$('#' + pane).removeClass('hide');
+        		$('.button-collapse').sideNav('hide');
+        		
+        		if (pane == "pane2") {
+        			setMainColor();
+        		}
+        	}
+        	
+        
+        	// ******************************************************************
+        	// init()
+        	// ******************************************************************
+        	function init() {
+        		console.log("Connection websockets to:", ws_url);
+        		connection = new WebSocket(ws_url, ['arduino']);
+        	
+        		// Load modes async
+        	$.getJSON("http://" + host + "/get_modes", function(data) {
+        			console.log("modes", data);
+        			var modes_html = "";
+        			data.forEach(function(current_mode){
+        				if (current_mode.mode !== undefined) {
+        					modes_html += '<div class="col s12 m6 l3 btn_grid">'; 
+        					modes_html += '<a id="modebutton'+ current_mode.mode + '" class="btn waves-effect waves-light btn_mode blue" name="action" data-mode="' + current_mode.mode + '">'+ current_mode.name; 
+        					modes_html += '</a>';
+        					modes_html += '</div>';
+        				}
+        			});   
+        			$('#modes').html(modes_html);
+        		});
+        
+        setTimeout(checktags, 1000);
+        
+        function checktags() {
+        	//var host1 = window.location.hostname;
+        	$.getJSON("http://" + host + "/get_dimflag", function(data) {
+        		//	console.log("dimflag: ", data);
+        		    $("[id=numcolor]").removeClass("blue").addClass("red");  // set the hour number
+        			data.forEach(function(current_mode){   //cycle through JSON output and check variables
+        			if (current_mode.name !== undefined) {				
+        				if (current_mode.name == "dimflag"){
+        					if(current_mode.mode == 1){
+        					document.getElementById("dimSwitch").checked = true;
+        					}
+        				}
+        				if (current_mode.name == "arcflag"){
+        					if(current_mode.mode == 1){
+        					document.getElementById("arcSwitch").checked = true;
+        					}
+        				}
+        				if (current_mode.name == "secondhandstate"){
+        					if(current_mode.mode == 1){
+        					document.getElementById("secondhandswitch").checked = true;
+        					}
+        				}
+        				if (current_mode.name == "dayflag"){
+        					if(current_mode.mode == 1){
+        					document.getElementById("daylightSwitch").checked = true;
+        					}
+        				}
+        				if (current_mode.name == "clockmode"){
+        //					console.log(att);
+        					$("[id=modebutton"+ current_mode.mode + "]").removeClass("blue").addClass("red");
+        				}	
+        				if (current_mode.name == "ringmode"){
+        					$("[id=ringbutton"+ current_mode.mode + "]").removeClass("blue").addClass("red");
+        				}	
+        				if (current_mode.name == "brightness"){
+        					document.getElementById("rng_brightness").value = current_mode.mode;
+        				}
+        				if (current_mode.name == "speed"){
+        					document.getElementById("rng_delay").value = current_mode.mode;
+        				}
+        			}
+        			});
+        			});		
+        
+        }
+        
+        		// When the connection is open, send some data to the server
+        		connection.onopen = function () {
+        			//connection.send('Ping'); // Send the message 'Ping' to the server
+        			console.log('WebSocket Open');
+        			showPane('pane1');
+        		};
+        
+        		// Log errors
+        		connection.onerror = function (error) {
+        			console.log('WebSocket Error ' + error);
+        			$('#mc-wsloader').addClass('hide');
+        			$('#mc-wserror').removeClass('hide');
+        		//	document.location.reload()
+        
+        		};
+        
+        		// Log messages from the server
+        		connection.onmessage = function (e) {
+        			console.log('WebSocket from server: ' + e.data);
+        			ws_waiting = 0;
+        		};
+        	};
+        
+        	// ******************************************************************
+        	// Modes
+        	// ******************************************************************	
+        
+        	$("#pane1").on("click", ".btn_mode_static", function() {
+        		var clockm = $(this).attr("data-mode");
+        		var btn = $(this);
+        		
+        		wsSendCommand("=" + clockm);
+        		$(".btn_mode_static").removeClass("red").addClass("blue");
+        		btn.removeClass("blue").addClass("red");
+        	}); 
+        
+        	$("#pane1").on("click", ".btn_mode", function() {
+        		var mode = $(this).attr("data-mode");
+        		last_mode = mode;
+        		var btn = $(this);
+        		setMode(mode, function() {
+        			$(".btn_mode").removeClass("red").addClass("blue");
+        			btn.removeClass("blue").addClass("red");
+        		});
+        	});	
+        
+        	$("#pane1").on("click", ".btn_mode_color", function() {
+        		var mode = $(this).attr("data-mode");
+        		last_mode = mode;
+        		var btn = $(this);
+        		setMode(mode, function() {
+        			$(".btn_mode_color").removeClass("red").addClass("blue");
+        			btn.removeClass("blue").addClass("red");
+        		});
+        	});		
+        
+        //  Sliders
+        	
+        	$("#pane1").on("change", ".update_delay", function() {
+        		var delay = $("#rng_delay").val();		
+        		wsSendCommand("?" + delay);
+        	});
+        	
+        
+        	
+        	$("#pane1").on("change", ".update_brightness", function() {
+        		var brightness = $("#rng_brightness").val();		
+        		wsSendCommand("%" + brightness);
+        	});
+        
+        
+        	$("#dimSwitch").on("change", function () {
+        		if ($(this).prop('checked')) {
+        			wsSendCommand("dimon");
+        		} else {
+        			wsSendCommand("dimoff");
+        		}
+        	}); 
+        
+        	$("#secondhandswitch").on("change", function () {
+        		if ($(this).prop('checked')) {
+        			wsSendCommand("sechandon");
+        		} else {
+        			wsSendCommand("sechandoff");
+        		}
+        	}); 
+        
+        	$("#daylightSwitch").on("change", function () {
+        		if ($(this).prop('checked')) {
+        			wsSendCommand("daylighton");
+        		} else {
+        			wsSendCommand("daylightoff");
+        		}
+        	}); 
+        
+        	$("#arcSwitch").on("change", function () {
+        		if ($(this).prop('checked')) {
+        			wsSendCommand("arcon");
+        		} else {
+        			wsSendCommand("arcoff");
+        		}
+        	}); 
+        
+        	$("#location").on("change", function () {
+        		wsSendCommand("q" + $(this).val());			
+        	}); 		
+        
+        	$("#numcolor").on("click", function () {
+        		colormode = "maincolor";
+        	}); 
+        	
+        	$("#mindotcolor").on("click", function () {
+        		colormode = "mindot";
+        	}); 
+        
+        	$("#hourdotcolor").on("click", function () {
+        		colormode = "hourdot";
+        	}); 
+        
+        	$("#secdotcolor").on("click", function () {
+        		colormode = "secdot";
+        	}); 
+        
+        	$("#hrcolor").on("click", function () {
+        		colormode = "hournumber";
+        	}); 
+        	 
+        	$("#sweepcolor").on("click", function () {
+        		colormode = "sweep";
+        	}); 
+        
+        	$("#altcolor").on("click", function () {
+        		colormode = "alt";
+        	}); 
+        
+        	function setMode(mode, finish_funtion) {
+        		console.log("Mode: ", mode);
+        
+        		wsSendCommand("/" + mode);
+        		finish_funtion();
+        	}
+        
+        	function setMainColor() {
+        		var red = $("#rng_red").val();
+        		var green = $("#rng_green").val();
+        		var blue = $("#rng_blue").val();		
+        		
+        		var mainColorHex = componentToHex(red) + componentToHex(green) + componentToHex(blue);
+        		wsSetMainColor(mainColorHex);
+        	}
+        
+        	function settheColor() {
+        		var red = $("#rng_red").val();
+        		var green = $("#rng_green").val();
+        		var blue = $("#rng_blue").val();		
+        		
+        		var mainColorHex = componentToHex(red) + componentToHex(green) + componentToHex(blue);
+        		wsSettheColor(mainColorHex);
+        	}
+        	
+        	
+        	// ******************************************************************
+        	// WebSocket commands
+        	// ******************************************************************
+        	function wsSendCommand(cmd) {
+        		console.log("Send WebSocket command:", cmd);
+        		if (ws_waiting == 0)  {
+        			connection.send(cmd);
+        			ws_waiting++;
+        		} else {
+        			console.log("++++++++ WS call waiting, skip")
+        		}
+        	}	
+        	
+        	function wsSetAll(hexColor) {
+        		console.log("wsSetAll() Set all colors to:", hexColor);
+        		wsSendCommand("*" + hexColor);
+        	}
+        	
+        	function wsSetMainColor(hexColor) {
+        		console.log("wsSetMainColor() Set main colors to:", hexColor);
+        		wsSendCommand("#" + hexColor);
+        	}
+        
+        	function wsSettheColor(hexColor) {
+        		console.log("wsSettheColor() Set main colors to:", hexColor);
+        		if (colormode == "mindot"){
+        		wsSendCommand("j" + thecolor);			// send mode and color to request_handler.h
+        		}
+        		if (colormode == "hourdot"){
+        		wsSendCommand("k" + thecolor);			
+        		}
+        		if (colormode == "hournumber"){
+        		wsSendCommand("l" + thecolor);			
+        		}
+        		if (colormode == "secdot"){
+        		wsSendCommand("m" + thecolor);			
+        		}
+        		if (colormode == "sweep"){
+        		wsSendCommand("n" + thecolor);			
+        		}
+        		if (colormode == "alt"){
+        		wsSendCommand("o" + thecolor);			
+        		}
+        		if (colormode == "maincolor"){
+        		wsSendCommand("p" + thecolor);			
+        		}
+        	}
+        	
+        	
+        	// ******************************************************************
+        	// Colorwheel
+        	// ******************************************************************
+        	// this is supposed to work on mobiles (touch) as well as on a desktop (click)
+        	// since we couldn't find a decent one .. this try of writing one by myself
+        	// + google. swiping would be really nice - I will possibly implement it with
+        	// jquery later - or never.
+        
+        	var canvas = document.getElementById("myCanvas");
+        	// FIX: Cancel touch end event and handle click via touchstart
+        	// canvas.addEventListener("touchend", function(e) { e.preventDefault(); }, false);
+        	canvas.addEventListener("touchmove", doTouch, false);
+        	canvas.addEventListener("click", doClick, false);
+        	//canvas.addEventListener("mousemove", doClick, false);
+        
+        	
+        	var context = canvas.getContext('2d');
+        	var centerX = canvas.width / 2;
+        	var centerY = canvas.height / 2;
+        	var innerRadius = canvas.width / 3;
+        	var outerRadius = (canvas.width - 10) / 2
+        
+        	//outer border
+        	context.beginPath();
+        	//outer circle
+        	context.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI, false);
+        	//draw the outer border: (gets drawn around the circle!)
+        	context.lineWidth = 4;
+        	context.strokeStyle = '#ffffff';
+        	context.stroke();
+        	context.closePath();
+        
+        	//fill with beautiful colors 
+        	//taken from here: http://stackoverflow.com/questions/18265804/building-a-color-wheel-in-html5
+        	for(var angle=0; angle<=360; angle+=1) {
+        		var startAngle = (angle-2)*Math.PI/180;
+        		var endAngle = angle * Math.PI/180;
+        		context.beginPath();
+        		context.moveTo(centerX, centerY);
+        		context.arc(centerX, centerY, outerRadius, startAngle, endAngle, false);
+        		context.closePath();
+        		context.fillStyle = 'hsl('+angle+', 100%, 50%)';
+        		context.fill();
+        		context.closePath();
+        	}
+        
+        	//inner border
+        	context.beginPath();
+        	//context.arc(centerX, centerY, radius, startAngle, endAngle, counterClockwise);
+        	context.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, false);
+        	//fill the center
+        	var my_gradient=context.createLinearGradient(0,0,170,0);
+        	my_gradient.addColorStop(1,"black");
+        	my_gradient.addColorStop(1,"white");
+        	
+        	context.fillStyle = my_gradient;
+        	context.fillStyle = "white";
+        	context.fill();
+        
+        	//draw the inner line
+        	context.lineWidth = 2;
+        	context.strokeStyle = '#ffffff';
+        	context.stroke();
+        	context.closePath();
+        
+        	//get Mouse x/y canvas position
+        	function getMousePos(canvas, evt) {
+        		var rect = canvas.getBoundingClientRect();
+        		return {
+        			x: evt.clientX - rect.left,
+        			y: evt.clientY - rect.top
+        		};
+        	}
+        
+        	//comp to Hex
+        	function componentToHex(c) {
+        		//var hex = c.toString(16);
+        		//return hex.length == 1 ? "0" + hex : hex;
+        		return  ("0"+(Number(c).toString(16))).slice(-2).toUpperCase();
+        	}
+        
+        	//rgb/rgba to Hex
+        	function rgbToHex(rgb) {
+        		return componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
+        	}
+        
+        	//display the touch/click position and color info
+        	function updateStatus(pos, color) {
+        		hexColor = rgbToHex(color);
+        	//	wsSetAll(hexColor);
+        		thecolor = rgbToHex(color);
+        		hexColor = "#" + hexColor;
+        		settheColor();   //key function that updates color.
+        	//	$('#mindotcolor').text(hexColor + " - R=" + color[0] + ", G=" + color[1] + ", B=" + color[2]);
+        	//	$('#mindotcolor').text("x: " + pos.x + " - y: " + pos.y);
+        		
+        		$("#rng_red").val(color[0]);
+        		$("#rng_green").val(color[1]);
+        		$("#rng_blue").val(color[2]);
+        	}
+        
+        
+        
+        
+        	//handle the touch event
+        	function doTouch(event) {
+        		//to not also fire on click
+        		event.preventDefault();
+        		var el = event.target;
+        		
+        		//touch position
+        		var pos = {x: Math.round(event.targetTouches[0].pageX - el.offsetLeft),
+        				   y: Math.round(event.targetTouches[0].pageY - el.offsetTop)};
+        		//color
+        		var color = context.getImageData(pos.x, pos.y, 1, 1).data;
+        
+        		updateStatus(pos, color);
+        	}
+        
+        	function doClick(event) {   
+        		//click position   
+        		var pos = getMousePos(canvas, event);
+        		//color
+        		var color = context.getImageData(pos.x, pos.y, 1, 1).data;
+        		
+        		//console.log("click", pos.x, pos.y, color);
+        		updateStatus(pos, color);
+        		
+        		//now do sth with the color rgbToHex(color);
+        		//don't do stuff when #000000 (outside circle and lines
+        	}
+        
+        
+        	// ******************************************************************
+        	// main
+        	// ******************************************************************
+        	init();
+        	
+        }); // end of document ready
+        })(jQuery); // end of jQuery name space
+    </script>
+
+
+    <!-- Javascript files -->
+    <!-- jQuery -->
+    <script src="http://brightlightart.com/js/jquery.js"></script>
+    <script type="text/javascript">
+        <!-- Main line chart -->         
+         $(function() {
+			/* Chart data #1 */
+			var d1 = [[0, 4], [1, 3.5], [2, 4.2], [3, 5.5],[4, 4.9], [5, 5], [6, 5.3], [7, 6],[8, 5.3], [9, 4], [10, 4], [11, 4.5],[12, 5], [13, 4]];
+			/* Chart data #2 */
+			var d2 = [[0, 2], [1, 1.5], [2, 2.2], [3, 3.5],[4, 2.9], [5, 3], [6, 3.3], [7, 4],[8, 3.3], [9, 2], [10, 2], [11, 2.5],[12, 3], [13, 2]];
+			var options = {
+               series: {
+                  lines: {
+                     show: true, fill: true, lineWidth:1, fillColor: { colors: [ { opacity: 0.05 }, { opacity: 0.15}] }
+                  },
+                  points: {
+                     show: true, fill: true, lineWidth:2, radius:3, fillColor: "#fff"
+                  },
+				  shadowSize: 0
+               },
+               colors :["#32c8de","#51d466"],
+               grid: {
+                  hoverable: true, color: "#bbb", backgroundColor:"#fff" ,borderWidth:1, borderColor:"#e8e8e8", labelMargin:10, margin: "auto"
+               },
+               xaxis: {
+				  ticks:12,
+                  font: {
+                        size: 11,
+                        color: "#aaa"
+                    }
+               },
+               yaxis: {
+				  ticks: 4,
+                  font: {
+                        size: 11,
+                        color: "#aaa"
+                    }
+               },
+			   legend: {
+				  backgroundOpacity:0,
+				  noColumns:2,
+				  labelBoxBorderColor: "#fff"
+			   }
+            };
+			
+			$("<div id='tooltip'></div>").css({
+				position: "absolute",
+				display: "none",
+				"border-radius":"5px",
+				padding: "0px 5px",
+				color:"#999",
+				"font-size":"11px",
+				"background-color": "#fff",
+				"border":"1px solid #ccc"
+			}).appendTo("body");
+
+			$("#m-line-chart").bind("plothover", function (event, pos, item) {
+					if (item) {
+						var x = item.datapoint[0].toFixed(2),
+							y = item.datapoint[1].toFixed(2);
+
+						$("#tooltip").html(x + ", " + y)
+							.css({top: item.pageY+5, left: item.pageX+5})
+							.fadeIn(200);
+					} else {
+						$("#tooltip").hide();
+					}
+			});
+
+			
+            <!-- Actual plotting -->
+            $.plot("#m-line-chart", [ { data: d1, label: "Revenue"},{ data: d2, label: "Profit"}], options);
+         });
+		 
+		 <!-- Line chart ends -->
+		 
+		 <!-- Bar chart starts -->
+		 
+		 $(function() {
+
+			var data1 = [];
+			for (var i = 0; i <= 20; i += 1) {
+				data1.push([i, parseInt(Math.random() * 30)]);
+			}
+
+			var data2 = [];
+			for (var i = 0; i <= 20; i += 1)
+			data2.push([i, parseInt(Math.random() * 30)]);
+		
+			var stack = 0,
+				bars = true,
+				lines = false,
+				steps = false;
+
+			function plotWithOptions() {
+				$.plot("#m-bar-chart", [ data1, data2 ], {
+					series: {
+						stack : stack,
+						bars: {
+							show: bars,
+							barWidth: 0.6,
+							lineWidth: 1,
+							fill: true,
+							fillColor: { colors: [ { opacity: 0.9 }, { opacity: 0.5}] }
+						}
+					},
+					colors: ["#3FB8CA", "#2BB3C7"],
+				    grid: {
+					     hoverable: true, color: "#bbb", backgroundColor:"#fff" ,borderWidth:1, borderColor:"#e8e8e8", labelMargin:15
+					},
+					xaxis: {
+					    ticks:8,
+					    font: {
+							size: 11,
+							color: "#aaa"
+						}
+					},
+					yaxis: {
+						ticks: 4,
+						font: {
+							size: 11,
+							color: "#aaa"
+						}
+					}
+				});
+			}
+
+			plotWithOptions();
+
+		});
+
+		<!-- Bar chart ends -->
+		
+		
+		<!-- Realtime chart starts -->
+
+		$(function () {
+			// we use an inline data source in the example, usually data would
+			// be fetched from a server
+			var data = [], totalPoints = 300;
+			function getRandomData() {
+				if (data.length > 0)
+					data = data.slice(1);
+
+				// do a random walk
+				while (data.length < totalPoints) {
+					var prev = data.length > 0 ? data[data.length - 1] : 50;
+					var y = prev + Math.random() * 10 - 5;
+					if (y < 10)
+						y = 10;
+					if (y > 70)
+						y = 70;
+					data.push(y);
+				}
+
+				// zip the generated y values with the x values
+				var res = [];
+				for (var i = 0; i < data.length; ++i)
+					res.push([i, data[i]])
+				return res;
+			}
+
+			// setup control widget
+			var updateInterval = 100;
+			$("#updateInterval").val(updateInterval).change(function () {
+				var v = $(this).val();
+				if (v && !isNaN(+v)) {
+					updateInterval = +v;
+					if (updateInterval < 1)
+						updateInterval = 1;
+					if (updateInterval > 2000)
+						updateInterval = 2000;
+					$(this).val("" + updateInterval);
+				}
+			});
+
+			// setup plot
+			var options = {
+				series: { shadowSize: 0 }, // drawing is faster without shadows
+				lines: {fill: true, lineWidth:1},
+				colors: ["#51d466"],
+				grid: {
+					hoverable: false, color: "#bbb", backgroundColor:"#fff" ,borderWidth:1, borderColor:"#e8e8e8", labelMargin:15
+				},
+				xaxis: {
+					ticks:8,
+					font: {
+						size: 11,
+							color: "#aaa"
+					}
+				},
+				yaxis: {
+					ticks: 4,
+					font: {
+						size: 11,
+						color: "#aaa"
+					}
+				}
+			};
+			var plot = $.plot($("#m-real-chart"), [ getRandomData() ], options);
+
+			function update() {
+				plot.setData([ getRandomData() ]);
+				// since the axes don't change, we don't need to call plot.setupGrid()
+				plot.draw();
+				
+				setTimeout(update, updateInterval);
+			}
+			update();
+			
+		});
+
+		<!-- Realtime charts ends -->
+		
+		<!-- Pie chart start -->
+		
+		$(function () {
+		
+			var data = [],
+			series = 3;
+
+			for (var i = 0; i < series; i++) {
+				data[i] = {
+					data: Math.floor((Math.random()*10)+1) + 1
+				}
+			}
+
+			var placeholder = $("#m-pie-chart");
+
+			placeholder.unbind();
+				
+			$.plot(placeholder, data, {
+				series: {
+					pie: { 
+						show: true,
+						innerRadius:0.6,
+						label: {
+							show: false
+						}
+					}
+				},
+				colors: ["#f75353","#51d466","#32c8de"],
+				grid: {hoverable: false},
+				legend: {
+					show: false
+				}
+			});
+
+
+		});
+		<!-- Pie chart ends -->
+		
+		/* ****************************************** */
+		/* Main area sparkline */
+		/* ****************************************** */
+
+		$("#spark1").sparkline([8,11,9,12,10,9,13,11,12,11,10,12,11,], {
+			type: 'bar',
+			height: '30',
+			barWidth: 4,
+			barColor: '#f75353'});
+
+		$("#spark2").sparkline([8,11,9,12,10,9,13,11,12,11,10,12,11,], {
+			type: 'bar',
+			height: '30',
+			barWidth: 4,
+			barColor: '#51d466'});
+			
+		$("#spark3").sparkline([8,11,9,12,10,9,13,11,12,11,10,12,11,], {
+			type: 'bar',
+			height: '30',
+			barWidth: 4,
+			barColor: '#32c8de'});
+    </script>
+
+</body>
+
+</html>
