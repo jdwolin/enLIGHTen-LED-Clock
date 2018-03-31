@@ -452,70 +452,7 @@ delay(300);
 
   server.begin();
 
-
-#ifdef ENABLE_STATE_SAVE
-  // Load state string from EEPROM
-  String saved_state_string = readEEPROM(256, 128);
-  String chk = getValue(saved_state_string, '|', 0);
-  if (chk == "STA") {
-    DBG_OUTPUT_PORT.printf("Found saved state: %s\n", saved_state_string.c_str());
-    String str_mode = getValue(saved_state_string, '|', 1);
-    mode = static_cast<MODE>(str_mode.toInt());
-    String str_ws2812fx_mode = getValue(saved_state_string, '|', 2);
-    ws2812fx_mode = str_ws2812fx_mode.toInt();
-    String str_ws2812fx_speed = getValue(saved_state_string, '|', 3);
-    ws2812fx_speed = str_ws2812fx_speed.toInt();
-    String str_brightness = getValue(saved_state_string, '|', 4);
-    brightness = str_brightness.toInt();
-    String str_red = getValue(saved_state_string, '|', 5);
-    main_color.red = str_red.toInt();
-    String str_green = getValue(saved_state_string, '|', 6);
-    main_color.green = str_green.toInt();
-    String str_blue = getValue(saved_state_string, '|', 7);
-    main_color.blue = str_blue.toInt();
-    str_red = getValue(saved_state_string, '|', 8);
-    hournum_color.red = str_red.toInt();
-    str_green = getValue(saved_state_string, '|', 9);
-    hournum_color.green = str_green.toInt();
-    str_blue = getValue(saved_state_string, '|', 10);
-    hournum_color.blue = str_blue.toInt();
-    str_red = getValue(saved_state_string, '|', 11);
-    sec_color.red = str_red.toInt();
-    str_green = getValue(saved_state_string, '|', 12);
-    sec_color.green = str_green.toInt();
-    str_blue = getValue(saved_state_string, '|', 13);
-    sec_color.blue = str_blue.toInt();
-    str_red = getValue(saved_state_string, '|', 14);
-    sweep_color.red = str_red.toInt();
-    str_green = getValue(saved_state_string, '|', 15);
-    sweep_color.green = str_green.toInt();
-    str_blue = getValue(saved_state_string, '|', 16);
-    sweep_color.blue = str_blue.toInt();
-    str_red = getValue(saved_state_string, '|', 17);
-    min_color.red = str_red.toInt();
-    str_green = getValue(saved_state_string, '|', 18);
-    min_color.green = str_green.toInt();
-    str_blue = getValue(saved_state_string, '|', 19);
-    min_color.blue = str_blue.toInt();
-    String str_temp = getValue(saved_state_string, '|', 20);
-    clockmode = str_temp.toInt();
-    str_temp = getValue(saved_state_string, '|', 21);
-    dimflag = str_temp.toInt();
-    str_temp = getValue(saved_state_string, '|', 22);
-    arcflag = str_temp.toInt();
-    str_temp = getValue(saved_state_string, '|', 23);
-    dayflag = str_temp.toInt();
-    str_temp = getValue(saved_state_string, '|', 24);
-    timezone = str_temp.toInt();
-//    DBG_OUTPUT_PORT.printf("ws2812fx_mode: %d\n", ws2812fx_mode);
-    strip.setMode(ws2812fx_mode);
-    strip.setSpeed(convertSpeed(ws2812fx_speed));
-    strip.setBrightness(brightness);
-    stripsecs.setBrightness(brightness);
-    strip.setColor(main_color.red, main_color.green, main_color.blue);
-  }
-sprintf(last_state, "STA|%2d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d", mode, ws2812fx_mode, ws2812fx_speed, brightness, main_color.red, main_color.green, main_color.blue, hournum_color.red, hournum_color.green, hournum_color.blue, sec_color.red, sec_color.green, sec_color.blue, sweep_color.red, sweep_color.green, sweep_color.blue, min_color.red, min_color.green, min_color.blue, clockmode, dimflag, arcflag, dayflag,timezone);
-#endif
+restoresettings();
 
 MDNS.addService("http","tcp",80);
 startup();
@@ -644,8 +581,8 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
    swinghoop();   // perpetual motion
  }
 
-#ifdef ENABLE_STATE_SAVE
-  // Check for state changes
+// check for changes in settings and save changes to eeprom if changes have happened
+  
   sprintf(current_state, "STA|%2d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d", mode, strip.getMode(), ws2812fx_speed, brightness, main_color.red, main_color.green, main_color.blue, hournum_color.red, hournum_color.green, hournum_color.blue, sec_color.red, sec_color.green, sec_color.blue, sweep_color.red, sweep_color.green, sweep_color.blue, min_color.red, min_color.green, min_color.blue,clockmode,dimflag, arcflag, dayflag, timezone);
   
   if (strcmp(current_state, last_state) != 0) {
@@ -663,7 +600,6 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
     EEPROM.commit();
     DBG_OUTPUT_PORT.printf("STATE CHANGED: %s / %s\n", last_state, current_state);
   }
-#endif
 
 
 

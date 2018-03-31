@@ -73,7 +73,8 @@ hourchanged = 1;
 }
 
 void handleSaveSettings(uint8_t * mypayload) {
-uint32_t settings = (uint32_t) strtol((const char *) &mypayload[1], NULL, 16);
+uint32_t savesettingdata = (uint32_t) strtol((const char *) &mypayload[1], NULL, 16);
+
 }
 
 
