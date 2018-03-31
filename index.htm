@@ -19,14 +19,12 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta charset="utf-8" />
-    <title>Clock Configuration Page</title>
 </head>
 
 <body>
     <nav class="blue light-blueXXX lighten-1XXX" role="navigation" id="mc-nav">
         <div class="nav-wrapper container">
-            <a id="logo-container" href="#" class="brand-logo">Clock Configuration</a>
-            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            <a id="logo-container" href="#" class="brand-logo">Configuration</a>
         </div>
     </nav>
 
@@ -190,9 +188,34 @@
 	<option timeZoneId="82" gmtAdjustment="GMT+13:00" useDaylightTime="0" value="13">(GMT+13:00) Nuku'alofa</option>
 </select>
                                 </div>
+
+<div class="row">
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="save1" data-mode="save1">Save #1</a>
+                                        </div>
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="save2" data-mode="save2">Save #2</a>
+                                        </div>
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="save3" data-mode="save3">Save #3</a>
+                                        </div>
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="recall1" data-mode="recall1">Restore</a>
+                                        </div>
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="recall2" data-mode="recall2">Restore</a>
+                                        </div>
+                                        <div class="col s4 m4 l4 btn_grid">
+                                            <a class="btn waves-effect waves-light btn_mode_save blue" id="recall3" data-mode="recall3">Restore</a>
+                                        </div>
+
+
+</div>
+
+
                             </div>
                             <div class="widget-foot">
-                                <span class="pull-left"><i class="fa fa-time"></i>General Settings and Config</span>
+                                <span class="pull-left"><i class="fa fa-time"></i>Settings and Config</span>
                                 <div class="clearfix"></div>
                             </div>
                         </div>
@@ -202,7 +225,7 @@
                         <!-- Project widget -->
                         <div class="widget pages-widget">
                             <div class="widget-head br-green">
-                                <h3><img src="http://brightlightart.com/img/bulb.png">Color Customization - Changes Update Immediately </h3>
+                                <h3><img src="http://brightlightart.com/img/bulb.png">Color Customization</h3>
                             </div>
                             <div class="widget-body">
                                 <div class="row">
@@ -234,7 +257,7 @@
                                 </div>
                             </div>
                             <div class="widget-foot">
-                                <span class="pull-left"><i class="fa fa-time"></i>Use Buttons to the Right to Change Clock Colors (No Save Needed)</span>
+                                <span class="pull-left"><i class="fa fa-time"></i>Click Buttons to the Right and then Click Color Wheel to Change Clock Colors (No Save Needed)</span>
                                 <div class="clearfix"></div>
                             </div>
                         </div>
@@ -248,7 +271,7 @@
                         <div class="widget pages-widget">
 
                             <div class="widget-head br-green">
-                                <h3><img src="http://brightlightart.com/img/clock.png"></i>Clock Mode</h3>
+                                <h3><img src="http://brightlightart.com/img/clock.png"></i>Ring Modes</h3>
                             </div>
                             <div class="widget-body">
                                 <div class="row">
@@ -294,6 +317,18 @@
                                     <div class="col s12 m12 l12 btn_grid">
                                         <a id="ringbutton14" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="hope">Peace</a>
                                     </div>
+                                                                        <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton15" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="living">Volcanoe</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton16" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="stars">Shooting</a>
+                                    </div>
+                                    <div class="col s12 m17 l12 btn_grid">
+                                        <a id="ringbutton13" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="hope">Triumphant</a>
+                                    </div>
+                                    <div class="col s12 m12 l12 btn_grid">
+                                        <a id="ringbutton18" class="btn waves-effect waves-light btn_mode_static blue" name="action" data-mode="hope">Chill</a>
+                                    </div>
                                 </div>
                             </div>
 
@@ -316,7 +351,7 @@
                         <!-- Home chart widget -->
                         <div class="widget pages-widget">
                             <div class="widget-head br-green">
-                                <h3 class="pull-left"><img src=http://brightlightart.com/img/color.png>Select Special Effects to Include in Number Animations</h3>
+                                <h3 class="pull-left"><img src=http://brightlightart.com/img/color.png>Number Animations</h3>
                                 <div class="clearfix"></div>
                             </div>
 
@@ -342,6 +377,13 @@
                 </div>
 
                                 <div class="row">
+
+                    <div class="col s12 m3 l3 btn_grid">
+                        <a id="pibutton" class="btn waves-effect waves-light btn_mode_custom blue" name="action" data-mode="tv">Pi Day
+                        </a>
+                    </div>
+
+
                                     <div id="modes">
                                         <div class="input-field col s12">
                                             Loading animations...
@@ -451,7 +493,8 @@
         	$.getJSON("http://" + host + "/get_dimflag", function(data) {
         		//	console.log("dimflag: ", data);
         		    $("[id=numcolor]").removeClass("blue").addClass("red");  // set the hour number
-        			data.forEach(function(current_mode){   //cycle through JSON output and check variables
+        			
+                    data.forEach(function(current_mode){   //cycle through JSON output and check variables
         			if (current_mode.name !== undefined) {				
         				if (current_mode.name == "dimflag"){
         					if(current_mode.mode == 1){
@@ -474,7 +517,6 @@
         					}
         				}
         				if (current_mode.name == "clockmode"){
-        //					console.log(att);
         					$("[id=modebutton"+ current_mode.mode + "]").removeClass("blue").addClass("red");
         				}	
         				if (current_mode.name == "ringmode"){
@@ -505,9 +547,13 @@
         			$('#mc-wsloader').addClass('hide');
         			$('#mc-wserror').removeClass('hide');
         		//	document.location.reload()
-        
         		};
         
+                connection.close = function (e) {
+                    alert('Connection Needs to be Reset.  Please refresh the page');
+
+                };
+
         		// Log messages from the server
         		connection.onmessage = function (e) {
         			console.log('WebSocket from server: ' + e.data);
@@ -519,6 +565,7 @@
         	// Modes
         	// ******************************************************************	
         
+            //mode buttons
         	$("#pane1").on("click", ".btn_mode_static", function() {
         		var clockm = $(this).attr("data-mode");
         		var btn = $(this);
@@ -526,38 +573,54 @@
         		$(".btn_mode_static").removeClass("red").addClass("blue");
         		btn.removeClass("blue").addClass("red");
         	}); 
-        
+
+            //save buttons
+            $("#pane1").on("click", ".btn_mode_save", function() {
+                var savedata = $(this).attr("data-mode");
+                var btn = $(this);
+                wsSendCommand("a" + savedata);
+                $(".btn_mode_save").removeClass("red").addClass("blue");
+                btn.removeClass("blue").addClass("red");
+            });         
+
+            //standard mode buttons
         	$("#pane1").on("click", ".btn_mode", function() {
         		var mode = $(this).attr("data-mode");
         		last_mode = mode;
         		var btn = $(this);
         		setMode(mode, function() {
-        			$(".btn_mode").removeClass("red").addClass("blue");
+        			$(".btn_mode, .btn_mode_custom").removeClass("red").addClass("blue");
         			btn.removeClass("blue").addClass("red");
         		});
-        	});	
-        
+        	});	 
+
+            //special modes buttons
+            $("#pane1").on("click", ".btn_mode_custom", function() {
+                var clockm = $(this).attr("data-mode");
+                var btn = $(this);
+                wsSendCommand("=" + clockm);
+                $(".btn_mode, .btn_mode_custom").removeClass("red").addClass("blue");
+                btn.removeClass("blue").addClass("red");
+            }); 
+
+            //color buttons
         	$("#pane1").on("click", ".btn_mode_color", function() {
         		var btn = $(this);
         		$(".btn_mode_color").removeClass("red").addClass("blue");
         		btn.removeClass("blue").addClass("red");
         	});		
-        
-        //  Sliders
-        	
+
+            //sliders
         	$("#pane1").on("change", ".update_delay", function() {
         		var delay = $("#rng_delay").val();		
         		wsSendCommand("?" + delay);
-        	});
-        	
-        
-        	
+        	});     		
         	$("#pane1").on("change", ".update_brightness", function() {
         		var brightness = $("#rng_brightness").val();		
         		wsSendCommand("%" + brightness);
         	});
         
-        
+            //dim switch
         	$("#dimSwitch").on("change", function () {
         		if ($(this).prop('checked')) {
         			wsSendCommand("dimon");
@@ -565,7 +628,7 @@
         			wsSendCommand("dimoff");
         		}
         	}); 
-        
+            //turn of second hand switch
         	$("#secondhandswitch").on("change", function () {
         		if ($(this).prop('checked')) {
         			wsSendCommand("sechandon");
@@ -624,7 +687,6 @@
         
         	function setMode(mode, finish_funtion) {
         		console.log("Mode: ", mode);
-        
         		wsSendCommand("/" + mode);
         		finish_funtion();
         	}

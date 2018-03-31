@@ -23,6 +23,11 @@ int ledStates[NUMLEDS];
 int ledinc = 0, growprogress = 0;
 int Red, Green, Blue;
 int LEDrmin,LEDgmin,LEDbmin;
+int piloop = 0;
+int piloop1 = 0;
+int piindex = 0;
+int intervalone = 400;
+ char pi[] = "14159265358979323846264338327950288419716939937510";
 
 
 // ***************************************************************************
@@ -290,7 +295,11 @@ if (minchanged == 0){
  //          Serial.printf("ledinc:%d \n", ledinc);
 
         if(tails==1){  //if we want tails 
-          nextpixels(ledinc,ledinc+12);
+          int endpixel = ledinc + 12;
+          if (endpixel > 120){
+            endpixel = endpixel - 120;
+          }
+          nextpixels(ledinc,endpixel);
         }
         else{
           nextpixels(0,0,ledinc,alt_color.red,alt_color.green,alt_color.blue);
@@ -531,10 +540,6 @@ void eventcall() {
 
 
 // See: http://forum.mysensors.org/topic/85/phoneytv-for-vera-is-here/13
-void tv() {
-  checkForRequests();
-
-}
 
 
 void one() {         // LED's that make 1 o'clock
@@ -640,4 +645,64 @@ void dot(){
     stripsecs.setPixelColor(x*10-2,strip.Color(main_color.red,main_color.green,main_color.blue));
   }
   stripsecs.show();
+}
+
+void tv() {
+unsigned long currentMillis = millis();
+if(currentMillis - previousMillis > intervalone) {
+    previousMillis = currentMillis;   
+if(piloop == 0){
+      strip.setColor(0, 0, 0);
+      strip.setMode(FX_MODE_STATIC);
+      mode = HOLD;
+three();
+delay(500);
+dot();
+delay(500);
+piloop = 1;
+piindex = 0;
+}
+else{
+piindex = piindex + 1;
+if(piindex < 50){
+
+if(pi[piindex]=='0'){
+  zero();
+}
+if(pi[piindex]=='1'){
+  one();
+}
+if(pi[piindex]=='2'){
+  two();
+}
+if(pi[piindex]=='3'){
+  three();
+}
+if(pi[piindex]=='4'){
+  four();
+}
+if(pi[piindex]=='5'){
+  five();
+}
+if(pi[piindex]=='6'){
+  six();
+}
+if(pi[piindex]=='7'){
+  seven();
+}
+if(pi[piindex]=='8'){
+  eight();
+}
+if(pi[piindex]=='9'){
+  nine();
+}
+}
+else{
+  piindex = 0;
+  piloop = 0;
+
+}
+}
+}
+
 }

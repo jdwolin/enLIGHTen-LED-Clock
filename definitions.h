@@ -17,6 +17,7 @@ uint32_t autoParams[][4] = {   // color, speed, mode, duration (seconds)
 // ***************************************************************************
 #define DBG_OUTPUT_PORT Serial  // Set debug output port
 
+
 // List of all color modes
 enum MODE { SET_MODE, HOLD, OFF, ALL, WIPE, RAINBOW, RAINBOWCYCLE, THEATERCHASE, THEATERCHASERAINBOW, TV, CUSTOM, WEATHER };
 MODE mode = RAINBOW;        // Standard mode that is active when software starts

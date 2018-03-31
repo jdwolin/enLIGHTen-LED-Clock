@@ -72,6 +72,12 @@ timezone = (int) zone;  // we need to cast from uint32_t to int
 hourchanged = 1;
 }
 
+void handleSaveSettings(uint8_t * mypayload) {
+uint32_t settings = (uint32_t) strtol((const char *) &mypayload[1], NULL, 16);
+}
+
+
+
 void handleSetMinColor(uint8_t * mypayload) {
   // decode rgb data
   uint32_t rgb = (uint32_t) strtol((const char *) &mypayload[1], NULL, 16);
@@ -246,7 +252,9 @@ void handleSetNamedMode(String str_mode) {
   if (str_mode.startsWith("=theaterchaseRainbow")) {
     mode = THEATERCHASERAINBOW;
   }
-
+  if (str_mode.startsWith("=tv")) {
+    mode = TV;
+  }
   //  clock modes on Pane 1
 
   if (str_mode.startsWith("=justaminute")) {
@@ -457,6 +465,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         webSocket.sendTXT(num, "OK");
       }
 
+      if (payload[0] == 'a') {// we are setting minute color
+        handleSaveSettings(payload);
+        webSocket.sendTXT(num, "OK");
+      }
+
       if (payload[0] == 'j') {// we are setting minute color
         handleSetMinColor(payload);
         webSocket.sendTXT(num, "OK");
@@ -467,30 +480,30 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         webSocket.sendTXT(num, "OK");
       }
 
-      if (payload[0] == 'l') { // we are setting hour color
+      if (payload[0] == 'l') { // we are setting hour number color
         handleSetHourNumberColor(payload);
         webSocket.sendTXT(num, "OK");
       }
 
-      if (payload[0] == 'm') { // we are setting hour color
+      if (payload[0] == 'm') { // we are setting second dot color
         handleSetSecDotColor(payload);
         webSocket.sendTXT(num, "OK");
       }
 
-      if (payload[0] == 'n') { // we are setting hour color
+      if (payload[0] == 'n') { // we are setting sweep color
         handleSetSweepColor(payload);
         webSocket.sendTXT(num, "OK");
       }
 
-      if (payload[0] == 'o') { // we are setting hour color
+      if (payload[0] == 'o') { // we are setting alt color
         handleSetAltColor(payload);
         webSocket.sendTXT(num, "OK");
       }
-      if (payload[0] == 'p') { // we are setting hour color
+      if (payload[0] == 'p') { // we are setting main color
         handleSetMainColor(payload);
         webSocket.sendTXT(num, "OK");
       }
-      if (payload[0] == 'q') { // we are setting hour color
+      if (payload[0] == 'q') { // we are setting timzone
         handleSetTimezone(payload);
         webSocket.sendTXT(num, "OK");
       }

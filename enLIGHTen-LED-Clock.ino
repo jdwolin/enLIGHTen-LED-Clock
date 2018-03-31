@@ -543,12 +543,18 @@ void loop() {
       strip.setMode(FX_MODE_STATIC);
       mode = HOLD;
     }
-   
+    if (mode == TV) {
+      tv();
+    }
     if (mode == HOLD || mode == CUSTOM) {
       if (exit_func) {
         exit_func = false;
       }
     }
+  if (mode != TV && mode != CUSTOM) {
+    strip.service();
+  }
+    
   strip.service();
   minute_hand = minute() *2;
 
