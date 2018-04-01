@@ -1,0 +1,146 @@
+/************************
+Designed by : http://responsivewebinc.com
+************************/
+
+body{
+	font-size:12px;
+	-webkit-font-smoothing: antialiased;
+	background:#333333;
+}
+
+h3{
+	font-weight:normal;
+	margin:0px;
+	padding:0px;
+}
+
+h3{
+	font-size:20px;
+}
+
+p{
+	margin:0;
+	padding:0;
+}
+
+a{
+	text-decoration:none !important;
+}
+
+a:hover, a:focus{
+	text-decoration:none !important;
+}
+
+a:hover,a:active,a:focus {
+	outline: 0;
+}
+
+::-moz-focus-inner {
+	border:0;
+}
+
+
+form{
+	margin:0px !important;
+}
+
+form *{
+	box-shadow:none !important;
+}
+
+form input{
+	font-size:12px !important;
+	border-radius:2px !important;
+	border:1px solid #ccc !important;
+}
+
+form label{
+	font-size:12px !important;
+}
+
+.br-green h3{
+	color:#fff !important;
+}
+
+.btn{
+	border-radius:2px;
+	text-decoration:none !important;
+	outline:none !important;
+}	
+
+
+.mainbar{
+	position:relative;
+	width:auto;
+	min-height:1000px;
+	margin-left:0px;
+	background:#333333 url("") repeat;
+}
+
+.mainbar .container{
+	width:100%;
+	max-width:100%;
+}
+
+
+.widget{
+	background:#fff;
+
+	margin-top:25px;
+}
+
+.settings-head {
+	padding-left:30px;
+	padding-top: 5px;
+	padding-right:30px;
+}
+.widget .widget-head{
+	padding:10px 10px;
+/*	border-top-left-radius:10px;
+	border-top-right-radius:10px;  */
+
+}
+
+.widget .widget-head h3{
+	font-size:23px;
+	line-height:20px;
+	color:#999;
+	font-weight:bold;
+}
+
+.widget .widget-body{
+	padding:15px;
+	border: 1px solid #d5d5d5;
+	border-top:0px;
+	min-height: 410px;
+}
+
+.widget .widget-foot{
+	background:#f8f8f8;
+	border: 1px solid #d5d5d5;
+	border-top:0px;
+	padding:10px 15px;
+	border-bottom-left-radius:3px;
+	border-bottom-right-radius:3px;
+}
+
+.widget .widget-foot span{
+	font-size:11px !important;
+}
+
+
+
+@media (max-width: 480px){
+	.widget .widget-head .pull-left{
+		float:none !important;
+	}
+}
+
+/* Tablets */
+@media (max-width: 767px){
+	.mainbar{
+		width:100%;
+		margin-left:0px;
+		position:static;
+	}
+}
