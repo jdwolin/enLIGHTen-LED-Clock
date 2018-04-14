@@ -1,6 +1,6 @@
 # enLIGHTen-LED-Clock
 
-The enLIGHTen clock is an open-source project that will initially release as part of a kickstarter campaign and instructable in April of 2018.
+The enLIGHTen clock is an open-source project that will initially release as part of a [kickstarter campaign launching April 16](https://www.kickstarter.com/projects/1926284625/96766872?ref=476285&token=661d0fbc) and [hackaday.io build log](https://hackaday.io/project/134300-enlighten-web-connected-open-source-led-clock).
 
 This project leverages a ton of work from the McLighting Project although the code is heavily modified.   The clock is now stable but as with any web-connected device, the possibilities for enhancement are many. 
 
@@ -11,5 +11,3 @@ Here are a few features:  The clock syncs every minute with a timeserver ensurin
 Special holiday modes can add festivity to your house during Halloween, New Years or Christmas. We even have a special mode for pi day where the clock animates the digits of pi for 100 digits every hour.
 
 The CNC source files are available on instructables.com as well as all the build instructions.  
-
-

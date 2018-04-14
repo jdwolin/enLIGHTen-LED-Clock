@@ -203,6 +203,9 @@ void setup() {
   char buffer[100];
   sprintf(buffer, WiFi.localIP().toString().c_str());
   DBG_OUTPUT_PORT.print(buffer); 
+  int rcol = -80;
+  int gcol = 0;
+  int bcol = 0;
 
   for (int z=0; z<15; z++){   //output ip address so users know where to connect.
     DBG_OUTPUT_PORT.println("");
@@ -213,8 +216,24 @@ void setup() {
     }
     stripsecs.show();
     clearNumbers();
-    delay(100);
+    delay(300);
+    rcol = rcol + 90;
+    gcol = gcol + 50;
+    bcol = bcol + 137;
 
+    if(rcol > 250){
+      rcol = rcol - 250;
+    }
+    if(gcol > 250){
+      gcol = gcol -250;
+    }
+    if(bcol > 250){
+      bcol = bcol - 250;
+    }
+
+    main_color.red=rcol;
+    main_color.green =gcol;
+    main_color.blue = bcol;
 
     if(buffer[z]=='1'){
       one();

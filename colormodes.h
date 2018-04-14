@@ -710,6 +710,8 @@ void dot(){
   stripsecs.show();
 }
 
+
+
 void tv() {
 unsigned long currentMillis = millis();
 if(currentMillis - previousMillis > intervalone) {
