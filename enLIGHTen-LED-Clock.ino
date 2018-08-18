@@ -1,64 +1,179 @@
 #include "definitions.h"
+#include "version.h"
+// ***************************************************************************
+// Load libraries for: WebServer / WiFiManager / WebSockets
+// ***************************************************************************
+#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <NtpClientLib.h>
-#include <ESP8266WiFi.h>
+// needed for library WiFiManager
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <WiFiManager.h>
+#include <WiFiManager.h>        //https://github.com/tzapu/WiFiManager
+
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <EEPROM.h>
-#include <WebSockets.h>
+#include <Timezone.h>	
+#include <WebSockets.h>           //https://github.com/Links2004/arduinoWebSockets
 #include <WebSocketsServer.h>
-#include <Ticker.h>
-#include <WiFiUdp.h>
-#include "WS2812FX.h"
-Ticker ticker;
 
-int hour_hand = 3, minute_hand, second_hand, previous_second, previous_minute, previous_hour, looptimer, flourishtime = 10, timezone = -5;
+
+
+TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, 0};    // Daylight time = UTC - 4 hours
+TimeChangeRule mySTD = {"EST", First, Sun, Nov, 2, -60};     // Standard time = UTC - 5 hours
+Timezone myTZ(myDST, mySTD);
+TimeChangeRule *tcr;
+int hour_hand = 3, timezflag, minute_hand, second_hand, previous_second, previous_minute, previous_hour, looptimer, flourishtime = 10, timezone = -5, hoursmall = 0, hourtall = 0;
 int clockmode = 2, timerflag = 99, interuptflag = 1, hourchanged = 0, minchanged = 0, secchanged = 0, secondhandstate = 1; 
 int playground = 0, decayline = 120, nightlevel = 20;
-char ipstring[20];
 int ipint = 0; 
+int stripoffset = 100;
+char ipstring[20];
 uint8_t LEDr, LEDg, LEDb;
-WS2812FX strip = WS2812FX(NUMLEDS, PIN, NEO_GRB + NEO_KHZ800);
-WS2812FX stripsecs = WS2812FX(NUMLEDSECS, PINS, NEO_GRB + NEO_KHZ800);
+
+// OTA
+#ifdef ENABLE_OTA
+  #include <WiFiUdp.h>
+  #include <ArduinoOTA.h>
+#endif
+
+//SPIFFS Save
+#if !defined(ENABLE_HOMEASSISTANT) and defined(ENABLE_STATE_SAVE_SPIFFS)
+  #include <ArduinoJson.h>        //https://github.com/bblanchon/ArduinoJson
+#endif
+
+// MQTT
+#ifdef ENABLE_MQTT
+  #include <PubSubClient.h>
+  #ifdef ENABLE_HOMEASSISTANT
+    #include <ArduinoJson.h>     //https://github.com/bblanchon/ArduinoJson
+  #endif
+
+  WiFiClient espClient;
+  PubSubClient mqtt_client(espClient);
+#endif
+
+#ifdef ENABLE_AMQTT
+  #include <AsyncMqttClient.h>    //https://github.com/marvinroger/async-mqtt-client
+                                  //https://github.com/me-no-dev/ESPAsyncTCP
+  #ifdef ENABLE_HOMEASSISTANT
+    #include <ArduinoJson.h>
+  #endif
+
+  AsyncMqttClient amqttClient;
+  WiFiEventHandler wifiConnectHandler;
+  WiFiEventHandler wifiDisconnectHandler;
+#endif
+
+
+// ***************************************************************************
+// Instanciate HTTP(80) / WebSockets(81) Server
+// ***************************************************************************
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
+#ifdef HTTP_OTA
+#include <ESP8266HTTPUpdateServer.h>
+ESP8266HTTPUpdateServer httpUpdater;
+#endif
+
+#ifdef USE_NEOANIMATIONFX
+// ***************************************************************************
+// Load libraries / Instanciate NeoAnimationFX library
+// ***************************************************************************
+// https://github.com/debsahu/NeoAnimationFX
+#include "NeoAnimationFX.h"
+#define NEOMETHOD NeoPBBGRB800
+
+NEOMETHOD neoStrip(220);
+NeoAnimationFX<NEOMETHOD> strip(neoStrip);
+
+// Uses Pin RX / GPIO3 (Only pin that is supported, due to hardware limitations)
+// NEOMETHOD NeoPBBGRB800 uses GRB config 800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+// NEOMETHOD NeoPBBGRB400 uses GRB config 400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+// NEOMETHOD NeoPBBRGB800 uses RGB config 800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+// NEOMETHOD NeoPBBRGB400 uses RGB config 400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+
+// Uses Pin D4 / GPIO2 (Only pin that is supported, due to hardware limitations)
+// NEOMETHOD NeoPBBGRBU800 uses GRB config 800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+// NEOMETHOD NeoPBBGRBU400 uses GRB config 400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+// NEOMETHOD NeoPBBRGBU800 uses RGB config 800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+// NEOMETHOD NeoPBBRGBU400 uses RGB config 400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+
+#endif
+
+#ifdef USE_WS2812FX
+// ***************************************************************************
+// Load libraries / Instanciate WS2812FX library
+// ***************************************************************************
+// https://github.com/kitesurfer1404/WS2812FX
+#include <WS2812FX.h>
+WS2812FX strip = WS2812FX(NUMLEDS, PIN, NEO_GRB + NEO_KHZ800);
+
+// Parameter 1 = number of pixels in strip
+// Parameter 2 = Arduino pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+
+// IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
+// pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
+// and minimize distance between Arduino and first pixel.  Avoid connecting
+// on a live circuit...if you must, connect GND first.
+#endif
+
+// ***************************************************************************
+// Load library "ticker" for blinking status led
+// ***************************************************************************
+#include <Ticker.h>
+Ticker ticker;
+#ifdef ENABLE_HOMEASSISTANT
+  Ticker ha_send_data;
+#endif
+#ifdef ENABLE_AMQTT
+  Ticker mqttReconnectTimer;
+  Ticker wifiReconnectTimer;
+#endif
+#ifdef ENABLE_STATE_SAVE_SPIFFS
+  Ticker spiffs_save_state;
+#endif
 void tick()
 {
+  //toggle state
   int state = digitalRead(BUILTIN_LED);  // get the current state of GPIO1 pin
   digitalWrite(BUILTIN_LED, !state);     // set pin to the opposite state
 }
 
-
-// ***************************************************************************
-// EEPROM helper
-// ***************************************************************************
-String readEEPROM(int offset, int len) {
-  String res = "";
-  for (int i = 0; i < len; ++i)
-  {
-    res += char(EEPROM.read(i + offset));
-    //DBG_OUTPUT_PORT.println(char(EEPROM.read(i + offset)));
+#ifdef ENABLE_STATE_SAVE_EEPROM
+  // ***************************************************************************
+  // EEPROM helper
+  // ***************************************************************************
+  String readEEPROM(int offset, int len) {
+    String res = "";
+    for (int i = 0; i < len; ++i)
+    {
+      res += char(EEPROM.read(i + offset));
+      //DBG_OUTPUT_PORT.println(char(EEPROM.read(i + offset)));
+    }
+    DBG_OUTPUT_PORT.printf("readEEPROM(): %s\n", res.c_str());
+    return res;
   }
-  DBG_OUTPUT_PORT.printf("readEEPROM(): %s\n", res.c_str());
-  return res;
-}
-
-void writeEEPROM(int offset, int len, String value) {
-  DBG_OUTPUT_PORT.printf("writeEEPROM(): %s\n", value.c_str());
-  for (int i = 0; i < len; ++i)
-  {
-    if (i < value.length()) {
-      EEPROM.write(i + offset, value[i]);
-    } else {
-      EEPROM.write(i + offset, NULL);
+  
+  void writeEEPROM(int offset, int len, String value) {
+    DBG_OUTPUT_PORT.printf("writeEEPROM(): %s\n", value.c_str());
+    for (int i = 0; i < len; ++i)
+    {
+      if (i < value.length()) {
+        EEPROM.write(i + offset, value[i]);
+      } else {
+        EEPROM.write(i + offset, NULL);
+      }
     }
   }
-}
-
+#endif
 
 // ***************************************************************************
 // Saved state handling
@@ -68,18 +183,18 @@ String getValue(String data, char separator, int index)
 {
   int found = 0;
   int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
+  int maxIndex = data.length()-1;
 
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+  for(int i=0; i<=maxIndex && found<=index; i++){
+    if(data.charAt(i)==separator || i==maxIndex){
+        found++;
+        strIndex[0] = strIndex[1]+1;
+        strIndex[1] = (i == maxIndex) ? i+1 : i;
     }
   }
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
 
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
 
 // ***************************************************************************
 // Callback for WiFiManager library when config mode is entered
@@ -88,15 +203,13 @@ String getValue(String data, char separator, int index)
 void configModeCallback (WiFiManager *myWiFiManager) {
   DBG_OUTPUT_PORT.println("Entered config mode");
   DBG_OUTPUT_PORT.println(WiFi.softAPIP());
-
-  myWiFiManager->resetSettings();
   //if you used auto generated SSID, print it
   DBG_OUTPUT_PORT.println(myWiFiManager->getConfigPortalSSID());
   //entered config mode, make led toggle faster
   ticker.attach(0.2, tick);
 
   uint16_t i;
-  for (i = 0; i < strip.numPixels(); i++) {
+  for (i = 0; i < 220; i++) {
     strip.setPixelColor(i, 0, 0, 255);
   }
   strip.show();
@@ -121,23 +234,52 @@ void saveConfigCallback () {
 // ***************************************************************************
 // Include: Color modes
 // ***************************************************************************
-#include "colormodes.h"
-
-
+#ifdef ENABLE_LEGACY_ANIMATIONS
+  #include "colormodes.h"
+#endif
 
 // ***************************************************************************
 // MAIN
 // ***************************************************************************
 void setup() {
+//  system_update_cpu_freq(160);
+
+
+NTP.begin("es.pool.ntp.org", 0 , true); // get time from NTP server pool.
+NTP.setInterval(63);
+setTime(myTZ.toUTC(compileTime()));
+
+
   DBG_OUTPUT_PORT.begin(115200);
   EEPROM.begin(512);
-  NTP.begin("es.pool.ntp.org", 0 , true); // get time from NTP server pool.
-  NTP.setInterval(63);
 
   // set builtin led pin as output
   pinMode(BUILTIN_LED, OUTPUT);
+  // button pin setup
+#ifdef ENABLE_BUTTON
+  pinMode(BUTTON,INPUT_PULLUP);
+#endif
   // start ticker with 0.5 because we start in AP mode and try to connect
   ticker.attach(0.5, tick);
+
+  // ***************************************************************************
+  // Setup: SPIFFS
+  // ***************************************************************************
+  SPIFFS.begin();
+  {
+    Dir dir = SPIFFS.openDir("/");
+    while (dir.next()) {
+      String fileName = dir.fileName();
+      size_t fileSize = dir.fileSize();
+      DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
+    }
+
+    FSInfo fs_info;
+    SPIFFS.info(fs_info);
+    DBG_OUTPUT_PORT.printf("FS Usage: %d/%d bytes\n\n", fs_info.usedBytes, fs_info.totalBytes);
+  }
+
+  wifi_station_set_hostname(const_cast<char*>(HOSTNAME));
 
   // ***************************************************************************
   // Setup: Neopixel
@@ -145,26 +287,66 @@ void setup() {
   strip.init();
   strip.setBrightness(brightness);
   strip.setSpeed(convertSpeed(ws2812fx_speed));
+  //strip.setMode(FX_MODE_RAINBOW_CYCLE);
   strip.setColor(main_color.red, main_color.green, main_color.blue);
   strip.start();
-  stripsecs.init();
-  stripsecs.setBrightness(brightness);
-  stripsecs.setSpeed(convertSpeed(ws2812fx_speed));
-  stripsecs.setColor(main_color.red, main_color.green, main_color.blue);
-  stripsecs.start();
 
   // ***************************************************************************
   // Setup: WiFiManager
   // ***************************************************************************
-
   // The extra parameters to be configured (can be either global or just in the setup)
   // After connecting, parameter.getValue() will get you the configured value
   // id/name placeholder/prompt default length
+  #if defined(ENABLE_MQTT) or defined(ENABLE_AMQTT)
+    #if defined(ENABLE_STATE_SAVE_SPIFFS) and (defined(ENABLE_MQTT) or defined(ENABLE_AMQTT))
+      (readConfigFS()) ? DBG_OUTPUT_PORT.println("WiFiManager config FS Read success!"): DBG_OUTPUT_PORT.println("WiFiManager config FS Read failure!");
+    #else
+      String settings_available = readEEPROM(134, 1);
+      if (settings_available == "1") {
+        readEEPROM(0, 64).toCharArray(mqtt_host, 64);   // 0-63
+        readEEPROM(64, 6).toCharArray(mqtt_port, 6);    // 64-69
+        readEEPROM(70, 32).toCharArray(mqtt_user, 32);  // 70-101
+        readEEPROM(102, 32).toCharArray(mqtt_pass, 32); // 102-133
+        DBG_OUTPUT_PORT.printf("MQTT host: %s\n", mqtt_host);
+        DBG_OUTPUT_PORT.printf("MQTT port: %s\n", mqtt_port);
+        DBG_OUTPUT_PORT.printf("MQTT user: %s\n", mqtt_user);
+        DBG_OUTPUT_PORT.printf("MQTT pass: %s\n", mqtt_pass);
+      }
+    #endif
+    WiFiManagerParameter custom_mqtt_host("host", "MQTT hostname", mqtt_host, 64);
+    WiFiManagerParameter custom_mqtt_port("port", "MQTT port", mqtt_port, 6);
+    WiFiManagerParameter custom_mqtt_user("user", "MQTT user", mqtt_user, 32);
+    WiFiManagerParameter custom_mqtt_pass("pass", "MQTT pass", mqtt_pass, 32);
+  #endif
+
+  //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
   //reset settings - for testing
   //wifiManager.resetSettings();
+
   //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wifiManager.setAPCallback(configModeCallback);
+
+  #if defined(ENABLE_MQTT) or defined(ENABLE_AMQTT)
+    //set config save notify callback
+    wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+    //add all your parameters here
+    wifiManager.addParameter(&custom_mqtt_host);
+    wifiManager.addParameter(&custom_mqtt_port);
+    wifiManager.addParameter(&custom_mqtt_user);
+    wifiManager.addParameter(&custom_mqtt_pass);
+  #endif
+
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  
+  // Uncomment if you want to restart ESP8266 if it cannot connect to WiFi.
+  // Value in brackets is in seconds that WiFiManger waits until restart
+  //wifiManager.setConfigPortalTimeout(180);
+
+  // Uncomment if you want to set static IP 
+  // Order is: IP, Gateway and Subnet 
+  //wifiManager.setSTAStaticIPConfig(IPAddress(192,168,0,128), IPAddress(192,168,0,1), IPAddress(255,255,255,0));   
 
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
@@ -173,11 +355,40 @@ void setup() {
   if (!wifiManager.autoConnect(HOSTNAME)) {
     DBG_OUTPUT_PORT.println("failed to connect and hit timeout");
     //reset and try again, or maybe put it to deep sleep
-    wifiManager.resetSettings();
-    ESP.restart();
+    ESP.reset();  //Will be removed when upgrading to standalone offline McLightingUI version
+    delay(1000);  //Will be removed when upgrading to standalone offline McLightingUI version
   }
 
-  //if you get here you have connected to the WiFif
+  #if defined(ENABLE_MQTT) or defined(ENABLE_AMQTT)
+    //read updated parameters
+    strcpy(mqtt_host, custom_mqtt_host.getValue());
+    strcpy(mqtt_port, custom_mqtt_port.getValue());
+    strcpy(mqtt_user, custom_mqtt_user.getValue());
+    strcpy(mqtt_pass, custom_mqtt_pass.getValue());
+
+    //save the custom parameters to FS
+    #if defined(ENABLE_STATE_SAVE_SPIFFS) and (defined(ENABLE_MQTT) or defined(ENABLE_AMQTT))
+      (writeConfigFS(shouldSaveConfig)) ? DBG_OUTPUT_PORT.println("WiFiManager config FS Save success!"): DBG_OUTPUT_PORT.println("WiFiManager config FS Save failure!");
+    #else if defined(ENABLE_STATE_SAVE_EEPROM)
+      if (shouldSaveConfig) {
+        DBG_OUTPUT_PORT.println("Saving WiFiManager config");
+
+        writeEEPROM(0, 64, mqtt_host);   // 0-63
+        writeEEPROM(64, 6, mqtt_port);   // 64-69
+        writeEEPROM(70, 32, mqtt_user);  // 70-101
+        writeEEPROM(102, 32, mqtt_pass); // 102-133
+        writeEEPROM(134, 1, "1");        // 134 --> always "1"
+        EEPROM.commit();
+      }
+    #endif
+  #endif
+  
+  #ifdef ENABLE_AMQTT
+    wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+  #endif
+
+  //if you get here you have connected to the WiFi
   DBG_OUTPUT_PORT.println("connected...yeey :)");
   ticker.detach();
   //keep LED on
@@ -185,21 +396,97 @@ void setup() {
 
 
   // ***************************************************************************
-  // Configure MDNS
+  // Configure OTA
   // ***************************************************************************
+  #ifdef ENABLE_OTA
+    DBG_OUTPUT_PORT.println("Arduino OTA activated.");
 
-  MDNS.begin(HOSTNAME);  //mdns responder
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);  // start the socket.
+    // Port defaults to 8266
+    ArduinoOTA.setPort(8266);
+
+    // Hostname defaults to esp8266-[ChipID]
+    ArduinoOTA.setHostname(HOSTNAME);
+
+    // No authentication by default
+    // ArduinoOTA.setPassword("admin");
+
+    // Password can be set with it's md5 value as well
+    // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+    // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+    ArduinoOTA.onStart([]() {
+      DBG_OUTPUT_PORT.println("Arduino OTA: Start updating");
+    });
+    ArduinoOTA.onEnd([]() {
+      DBG_OUTPUT_PORT.println("Arduino OTA: End");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      DBG_OUTPUT_PORT.printf("Arduino OTA Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      DBG_OUTPUT_PORT.printf("Arduino OTA Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) DBG_OUTPUT_PORT.println("Arduino OTA: Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) DBG_OUTPUT_PORT.println("Arduino OTA: Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) DBG_OUTPUT_PORT.println("Arduino OTA: Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) DBG_OUTPUT_PORT.println("Arduino OTA: Receive Failed");
+      else if (error == OTA_END_ERROR) DBG_OUTPUT_PORT.println("Arduino OTA: End Failed");
+    });
+
+    ArduinoOTA.begin();
+    DBG_OUTPUT_PORT.println("");
+  #endif
+
+
+  // ***************************************************************************
+  // Configure MQTT
+  // ***************************************************************************
+  #ifdef ENABLE_MQTT
+    if (mqtt_host != "" && atoi(mqtt_port) > 0) {
+      snprintf(mqtt_intopic, sizeof mqtt_intopic, "%s/in", HOSTNAME);
+      snprintf(mqtt_outtopic, sizeof mqtt_outtopic, "%s/out", HOSTNAME);
+
+      DBG_OUTPUT_PORT.printf("MQTT active: %s:%d\n", mqtt_host, String(mqtt_port).toInt());
+
+      mqtt_client.setServer(mqtt_host, atoi(mqtt_port));
+      mqtt_client.setCallback(mqtt_callback);
+    }
+  #endif
+
+  #ifdef ENABLE_AMQTT
+    if (mqtt_host != "" && atoi(mqtt_port) > 0) {
+      amqttClient.onConnect(onMqttConnect);
+      amqttClient.onDisconnect(onMqttDisconnect);
+      amqttClient.onMessage(onMqttMessage);
+      amqttClient.setServer(mqtt_host, atoi(mqtt_port));
+      if (mqtt_user != "" or mqtt_pass != "") amqttClient.setCredentials(mqtt_user, mqtt_pass);
+      amqttClient.setClientId(mqtt_clientid);
+
+      connectToMqtt();
+    }
+  #endif
+
+  // #ifdef ENABLE_HOMEASSISTANT
+  //   ha_send_data.attach(5, tickerSendState); // Send HA data back only every 5 sec
+  // #endif
+
+  // ***************************************************************************
+  // Setup: MDNS responder
+  // ***************************************************************************
+  bool mdns_result = MDNS.begin(HOSTNAME);
+
   DBG_OUTPUT_PORT.print("Open http://");
   DBG_OUTPUT_PORT.print(WiFi.localIP());
   DBG_OUTPUT_PORT.println("/ to open McLighting.");
+
   DBG_OUTPUT_PORT.print("Use http://");
   DBG_OUTPUT_PORT.print(HOSTNAME);
   DBG_OUTPUT_PORT.println(".local/ when you have Bonjour installed.");
-  DBG_OUTPUT_PORT.print("New users: Open http://");
-  DBG_OUTPUT_PORT.println("/upload to upload the webpages first.");  
 
+  DBG_OUTPUT_PORT.print("New users: Open http://");
+  DBG_OUTPUT_PORT.print(WiFi.localIP());
+  DBG_OUTPUT_PORT.println("/upload to upload the webpages first.");
+
+  DBG_OUTPUT_PORT.println("");
   char buffer[100];
   sprintf(buffer, WiFi.localIP().toString().c_str());
   DBG_OUTPUT_PORT.print(buffer); 
@@ -210,12 +497,15 @@ void setup() {
   for (int z=0; z<15; z++){   //output ip address so users know where to connect.
     DBG_OUTPUT_PORT.println("");
     DBG_OUTPUT_PORT.println(buffer[z]);
+    
     delay(300);
     for (byte i = 0; i <= NUMLEDSECS; i++) {
-    stripsecs.setPixelColor(i, stripsecs.Color(0, 0, 0));
+    strip.setPixelColor(i+stripoffset, 0, 0, 0);
     }
-    stripsecs.show();
+    delay(0);
+    strip.show();
     clearNumbers();
+
     delay(300);
     rcol = rcol + 90;
     gcol = gcol + 50;
@@ -270,25 +560,12 @@ void setup() {
     }
   }
 
-delay(300);
-
 
   // ***************************************************************************
-  // Setup: SPIFFS
+  // Setup: WebSocket server
   // ***************************************************************************
-  SPIFFS.begin();
-  {
-    Dir dir = SPIFFS.openDir("/");
-    while (dir.next()) {
-      String fileName = dir.fileName();
-      size_t fileSize = dir.fileSize();
-      DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
-    }
-
-    FSInfo fs_info;
-    SPIFFS.info(fs_info);
-    DBG_OUTPUT_PORT.printf("FS Usage: %d/%d bytes\n\n", fs_info.usedBytes, fs_info.totalBytes);
-  }
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
 
   // ***************************************************************************
   // Setup: SPIFFS Webserver handler
@@ -306,18 +583,74 @@ delay(300);
   //first callback is called after the request has ended with all parsed arguments
   //second callback handles file uploads at that location
   server.on("/edit", HTTP_POST, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", "");
   }, handleFileUpload);
   //get heap status, analog input value and all GPIO statuses in one json call
   server.on("/esp_status", HTTP_GET, []() {
-    String json = "{";
-    json += "\"heap\":" + String(ESP.getFreeHeap());
-    // json += ", \"analog\":" + String(analogRead(A0));
-    // json += ", \"gpio\":" + String((uint32_t)(((GPI | GPO) & 0xFFFF) | ((GP16I & 0x01) << 16)));
-    json += "}";
-    server.send(200, "text/json", json);
-    json = String();
+    DynamicJsonDocument jsonBuffer;
+    JsonObject json = jsonBuffer.to<JsonObject>();
+  
+    json["HOSTNAME"] = HOSTNAME;
+    json["version"] = SKETCH_VERSION;
+    json["heap"] = ESP.getFreeHeap();
+    json["sketch_size"] = ESP.getSketchSize();
+    json["free_sketch_space"] = ESP.getFreeSketchSpace();
+    json["flash_chip_size"] = ESP.getFlashChipSize();
+    json["flash_chip_real_size"] = ESP.getFlashChipRealSize();
+    json["flash_chip_speed"] = ESP.getFlashChipSpeed();
+    json["sdk_version"] = ESP.getSdkVersion();
+    json["core_version"] = ESP.getCoreVersion();
+    json["cpu_freq"] = ESP.getCpuFreqMHz();
+    json["chip_id"] = ESP.getFlashChipId();
+    #ifndef USE_NEOANIMATIONFX
+    json["animation_lib"] = "WS2812FX";
+    json["pin"] = PIN;
+    #else
+    json["animation_lib"] = "NeoAnimationFX";
+    json["pin"] = "Ignored, check NEOMETHOD";
+    #endif
+    json["number_leds"] = NUMLEDS;
+    #ifdef ENABLE_BUTTON
+      json["button_mode"] = "ON";
+    #else
+      json["button_mode"] = "OFF";
+    #endif
+    #ifdef ENABLE_AMQTT
+      json["amqtt"] = "ON";
+    #endif
+    #ifdef ENABLE_MQTT
+      json["mqtt"] = "ON";
+    #endif
+    #ifdef ENABLE_HOMEASSISTANT
+      json["home_assistant"] = "ON";
+    #else
+      json["home_assistant"] = "OFF";
+    #endif
+    #ifdef ENABLE_LEGACY_ANIMATIONS
+      json["legacy_animations"] = "ON";
+    #else
+      json["legacy_animations"] = "OFF";
+    #endif
+    #ifdef HTTP_OTA
+      json["esp8266_http_updateserver"] = "ON";
+    #endif
+    #ifdef ENABLE_OTA
+      json["arduino_ota"] = "ON";
+    #endif
+    #ifdef ENABLE_STATE_SAVE_SPIFFS
+      json["state_save"] = "SPIFFS";
+    #endif
+    #ifdef ENABLE_STATE_SAVE_EEPROM
+      json["state_save"] = "EEPROM";
+    #endif
+    
+    String json_str;
+    serializeJson(json, json_str);
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", json_str);
   });
+
 
   //called when the url is not defined here
   //use it to load content from SPIFFS
@@ -327,26 +660,28 @@ delay(300);
   });
 
   server.on("/upload", handleMinimalUpload);
+
   server.on("/restart", []() {
     DBG_OUTPUT_PORT.printf("/restart\n");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", "restarting..." );
     ESP.restart();
   });
 
   server.on("/reset_wlan", []() {
     DBG_OUTPUT_PORT.printf("/reset_wlan\n");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", "Resetting WLAN and restarting..." );
     WiFiManager wifiManager;
-
     wifiManager.resetSettings();
     ESP.restart();
   });
 
   server.on("/start_config_ap", []() {
     DBG_OUTPUT_PORT.printf("/start_config_ap\n");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", "Starting config AP ..." );
     WiFiManager wifiManager;
-    WiFi.mode(WIFI_STA);
     wifiManager.startConfigPortal(HOSTNAME);
   });
 
@@ -355,32 +690,257 @@ delay(300);
   // Setup: SPIFFS Webserver handler
   // ***************************************************************************
   server.on("/set_brightness", []() {
-    if (server.arg("c").toInt() > 0) {
-      brightness = (int) server.arg("c").toInt() * 2.55;
-    } else {
-      brightness = server.arg("p").toInt();
-    }
-    if (brightness > 255) {
-      brightness = 255;
-    }
-    if (brightness < 0) {
-      brightness = 0;
-    }
-    strip.setBrightness(brightness);
-    if (mode == HOLD) {
-      mode = ALL;
-    }
+    getArgs();
+	mode = BRIGHTNESS;
+    #ifdef ENABLE_MQTT
+    mqtt_client.publish(mqtt_outtopic, String(String("OK %") + String(brightness)).c_str());
+    #endif
+    #ifdef ENABLE_AMQTT
+    amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String(String("OK %") + String(brightness)).c_str());
+    #endif
+    #ifdef ENABLE_HOMEASSISTANT
+      stateOn = true;
+      if(!ha_send_data.active())  ha_send_data.once(5, tickerSendState);
+    #endif
+    #ifdef ENABLE_STATE_SAVE_SPIFFS
+      if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+    #endif
     getStatusJSON();
   });
 
   server.on("/get_brightness", []() {
     String str_brightness = String((int) (brightness / 2.55));
+    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", str_brightness );
-
- //   DBG_OUTPUT_PORT.print("/get_brightness: ");
- //   DBG_OUTPUT_PORT.println(str_brightness);
+    DBG_OUTPUT_PORT.print("/get_brightness: ");
+    DBG_OUTPUT_PORT.println(str_brightness);
   });
-  server.on("/get_dimflag", []() {
+
+  server.on("/set_speed", []() {
+    if (server.arg("d").toInt() >= 0) {
+      ws2812fx_speed = server.arg("d").toInt();
+      ws2812fx_speed = constrain(ws2812fx_speed, 0, 255);
+      strip.setSpeed(convertSpeed(ws2812fx_speed));
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String(String("OK ?") + String(ws2812fx_speed)).c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String(String("OK ?") + String(ws2812fx_speed)).c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        if(!ha_send_data.active())  ha_send_data.once(5, tickerSendState);
+      #endif
+    }
+
+    getStatusJSON();
+  });
+
+  server.on("/get_speed", []() {
+    String str_speed = String(ws2812fx_speed);
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "text/plain", str_speed );
+    DBG_OUTPUT_PORT.print("/get_speed: ");
+    DBG_OUTPUT_PORT.println(str_speed);
+  });
+
+  server.on("/get_switch", []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "text/plain", (mode == OFF) ? "0" : "1" );
+    DBG_OUTPUT_PORT.printf("/get_switch: %s\n", (mode == OFF) ? "0" : "1");
+  });
+
+  server.on("/get_color", []() {
+    char rgbcolor[7];
+    snprintf(rgbcolor, sizeof(rgbcolor), "%02X%02X%02X", main_color.red, main_color.green, main_color.blue);
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "text/plain", rgbcolor );
+    DBG_OUTPUT_PORT.print("/get_color: ");
+    DBG_OUTPUT_PORT.println(rgbcolor);
+  });
+
+  server.on("/status", []() {
+    getStatusJSON();
+  });
+
+  server.on("/off", []() {
+    #ifdef ENABLE_LEGACY_ANIMATIONS
+      exit_func = true;
+    #endif
+    mode = OFF;
+    getArgs();
+    getStatusJSON();
+    #ifdef ENABLE_MQTT
+    mqtt_client.publish(mqtt_outtopic, String("OK =off").c_str());
+    #endif
+    #ifdef ENABLE_AMQTT
+    amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =off").c_str());
+    #endif
+    #ifdef ENABLE_HOMEASSISTANT
+      stateOn = false;
+    #endif
+    #ifdef ENABLE_STATE_SAVE_SPIFFS
+      if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+    #endif
+  });
+
+  server.on("/all", []() {
+    #ifdef ENABLE_LEGACY_ANIMATIONS
+      exit_func = true;
+    #endif
+    ws2812fx_mode = FX_MODE_STATIC;
+    mode = SET_MODE;
+    //mode = ALL;
+    getArgs();
+    getStatusJSON();
+    #ifdef ENABLE_MQTT
+    mqtt_client.publish(mqtt_outtopic, String("OK =all").c_str());
+    #endif
+    #ifdef ENABLE_AMQTT
+    amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =all").c_str());
+    #endif
+    #ifdef ENABLE_HOMEASSISTANT
+      stateOn = true;
+    #endif
+    #ifdef ENABLE_STATE_SAVE_SPIFFS
+      if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+    #endif
+  });
+
+  #ifdef ENABLE_LEGACY_ANIMATIONS
+    server.on("/wipe", []() {
+      exit_func = true;
+      mode = WIPE;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =wipe").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =wipe").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  
+    server.on("/rainbow", []() {
+      exit_func = true;
+      mode = RAINBOW;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =rainbow").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =rainbow").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  
+    server.on("/rainbowCycle", []() {
+      exit_func = true;
+      mode = RAINBOWCYCLE;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =rainbowCycle").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =rainbowCycle").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  
+    server.on("/theaterchase", []() {
+      exit_func = true;
+      mode = THEATERCHASE;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =theaterchase").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =theaterchase").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  
+    server.on("/twinkleRandom", []() {
+      exit_func = true;
+      mode = TWINKLERANDOM;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =twinkleRandom").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =twinkleRandom").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+    
+    server.on("/theaterchaseRainbow", []() {
+      exit_func = true;
+      mode = THEATERCHASERAINBOW;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =theaterchaseRainbow").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =theaterchaseRainbow").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  
+    server.on("/tv", []() {
+      exit_func = true;
+      mode = TV;
+      getArgs();
+      getStatusJSON();
+      #ifdef ENABLE_MQTT
+      mqtt_client.publish(mqtt_outtopic, String("OK =tv").c_str());
+      #endif
+      #ifdef ENABLE_AMQTT
+      amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String("OK =tv").c_str());
+      #endif
+      #ifdef ENABLE_HOMEASSISTANT
+        stateOn = true;
+      #endif
+      #ifdef ENABLE_STATE_SAVE_SPIFFS
+        if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+      #endif
+    });
+  #endif
+server.on("/get_dimflag", []() {
   String str_dimflag = "[";
         str_dimflag += "{\"mode\":";
     str_dimflag += String ((int) strip.getMode());
@@ -428,37 +988,6 @@ delay(300);
  //   String str_dimflag =  String ((int) strip.getMode()) + "," + String ((int) (ws2812fx_speed)) + "," + String ((int) (brightness)) + "," + String ((int) (clockmode)) + "," +  String((int) (dimflag)) + "," + String ((int) (arcflag)) + "," + String ((int) (secondhandstate)) + "," + String ((int) (dayflag));
     server.send(200, "application/json", str_dimflag );
   });
-
-  server.on("/set_speed", []() {
-    if (server.arg("d").toInt() >= 0) {
-      ws2812fx_speed = server.arg("d").toInt();
-      ws2812fx_speed = constrain(ws2812fx_speed, 0, 255);
-      strip.setSpeed(convertSpeed(ws2812fx_speed));
-    }
-    getStatusJSON();
-  });
-
- 
-
-
-  server.on("/status", []() {
-    getStatusJSON();
-  });
-
-  server.on("/off", []() {
-    exit_func = true;
-    mode = OFF;
-    getArgs();
-    getStatusJSON();
-  });
-
-  server.on("/all", []() {
-    exit_func = true;
-    mode = ALL;
-    getArgs();
-    getStatusJSON();
-  });
-
   server.on("/get_modes", []() {
     getModesJSON();
   });
@@ -467,56 +996,169 @@ delay(300);
     getArgs();
     mode = SET_MODE;
     getStatusJSON();
+
+    #ifdef ENABLE_MQTT
+    mqtt_client.publish(mqtt_outtopic, String(String("OK /") + String(ws2812fx_mode)).c_str());
+    #endif
+    #ifdef ENABLE_AMQTT
+    amqttClient.publish(mqtt_outtopic.c_str(), qospub, false, String(String("OK /") + String(ws2812fx_mode)).c_str());
+    #endif
+    #ifdef ENABLE_HOMEASSISTANT
+      stateOn = true;
+      if(!ha_send_data.active())  ha_send_data.once(5, tickerSendState);
+    #endif
+    #ifdef ENABLE_STATE_SAVE_SPIFFS
+      if(!spiffs_save_state.active()) spiffs_save_state.once(3, tickerSpiffsSaveState);
+    #endif
   });
 
+  #ifdef HTTP_OTA
+    httpUpdater.setup(&server, "/update");
+  #endif
+  restoresettings();
   server.begin();
+  startup();
+  // Start MDNS service
+  if (mdns_result) {
+    MDNS.addService("http", "tcp", 80);
+  }
 
-restoresettings();
-
-MDNS.addService("http","tcp",80);
-startup();
-hourchanged=1;
 }
 
 
-void loop() {
-  webSocket.loop();
-  server.handleClient();
 
-    // Simple statemachine that handles the different modes
-    if (mode == SET_MODE) {
-      DBG_OUTPUT_PORT.printf("SET_MODE: %d %d\n", ws2812fx_mode, mode);
-      strip.setMode(ws2812fx_mode);
-      mode = HOLD;
+void loop() {
+  #ifdef ENABLE_BUTTON
+    button();
+  #endif
+  server.handleClient();
+  webSocket.loop();
+
+  #ifdef ENABLE_OTA
+    ArduinoOTA.handle();
+  #endif
+
+  #ifdef ENABLE_MQTT
+    if (WiFi.status() != WL_CONNECTED) {
+      #ifdef ENABLE_HOMEASSISTANT
+         ha_send_data.detach();
+      #endif
+      DBG_OUTPUT_PORT.println("WiFi disconnected, reconnecting!");
+      WiFi.disconnect();
+      WiFi.setSleepMode(WIFI_NONE_SLEEP);
+      WiFi.mode(WIFI_STA);
+      WiFi.begin();
+    } else {
+      if (mqtt_host != "" && String(mqtt_port).toInt() > 0 && mqtt_reconnect_retries < MQTT_MAX_RECONNECT_TRIES) {
+        if (!mqtt_client.connected()) {
+          #ifdef ENABLE_HOMEASSISTANT
+           ha_send_data.detach();
+          #endif
+          DBG_OUTPUT_PORT.println("MQTT disconnected, reconnecting!");
+          mqtt_reconnect();
+        } else {
+          mqtt_client.loop();
+        }
+      }
     }
-    if (mode == OFF) {
-      strip.setColor(0, 0, 0);
-      strip.setMode(FX_MODE_STATIC);
-      mode = HOLD;
-    }
-    if (mode == ALL) {
+  #endif
+  #ifdef ENABLE_HOMEASSISTANT
+//   if(!ha_send_data.active())  ha_send_data.once(5, tickerSendState);
+   if (new_ha_mqtt_msg) sendState();
+  #endif
+          
+  // Simple statemachine that handles the different modes
+  if (mode == SET_MODE) {
+    DBG_OUTPUT_PORT.printf("SET_MODE: %d %d\n", ws2812fx_mode, mode);
+    strip.setMode(ws2812fx_mode);
+    strip.trigger();
+    prevmode = SET_MODE;
+    mode = SETCOLOR;
+  }
+  if (mode == OFF) {
+    if(strip.isRunning()) strip.stop(); //should clear memory
+    // mode = HOLD;
+  }
+  if (mode == SETCOLOR) {
+    strip.setColor(main_color.red, main_color.green, main_color.blue);
+    strip.trigger();
+    mode = (prevmode == SET_MODE) ? SETSPEED : HOLD;
+  }
+  if (mode == SETSPEED) {
+    strip.setSpeed(convertSpeed(ws2812fx_speed));
+    strip.trigger();
+    mode = (prevmode == SET_MODE) ? BRIGHTNESS : HOLD;
+  }
+  if (mode == BRIGHTNESS) {
+    strip.setBrightness(brightness);
+    strip.trigger();
+    if (prevmode == SET_MODE) prevmode = HOLD;
+    mode = HOLD;
+  }
+  #ifdef ENABLE_LEGACY_ANIMATIONS
+    if (mode == WIPE) {
       strip.setColor(main_color.red, main_color.green, main_color.blue);
-      strip.setMode(FX_MODE_STATIC);
+      strip.setMode(FX_MODE_COLOR_WIPE);
+      strip.trigger();
       mode = HOLD;
     }
-    if (mode == TV) {
-      tv();
+    if (mode == RAINBOW) {
+      strip.setMode(FX_MODE_RAINBOW);
+      strip.trigger();
+      mode = HOLD;
     }
-    if (mode == HOLD || mode == CUSTOM) {
+    if (mode == RAINBOWCYCLE) {
+      strip.setMode(FX_MODE_RAINBOW_CYCLE);
+      strip.trigger();
+      mode = HOLD;
+    }
+    if (mode == THEATERCHASE) {
+      strip.setColor(main_color.red, main_color.green, main_color.blue);
+      strip.setMode(FX_MODE_THEATER_CHASE);
+      strip.trigger();
+      mode = HOLD;
+    }
+    if (mode == TWINKLERANDOM) {
+      strip.setColor(main_color.red, main_color.green, main_color.blue);
+      strip.setMode(FX_MODE_TWINKLE_RANDOM);
+      strip.trigger();
+      mode = HOLD;
+    }
+    if (mode == THEATERCHASERAINBOW) {
+      strip.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+      strip.trigger();
+      mode = HOLD;
+    }
+  #endif
+  if (mode == HOLD || mode == CUSTOM) {
+    if(!strip.isRunning()) strip.start();
+    #ifdef ENABLE_LEGACY_ANIMATIONS
       if (exit_func) {
         exit_func = false;
       }
-    }
-  if (mode != TV && mode != CUSTOM) {
-    strip.service();
+    #endif
   }
-    
-  strip.service();
-  minute_hand = minute() *2;
+  #ifdef ENABLE_LEGACY_ANIMATIONS
+    if (mode == TV) {
+      if(!strip.isRunning()) strip.start();
+      tv();
+    }
+  #endif
+
+  // Only for modes with WS2812FX functionality
+  #ifdef ENABLE_LEGACY_ANIMATIONS
+  if (mode != TV && mode != CUSTOM) {
+  #else
+  if (mode != CUSTOM) {
+  #endif
+
+strip.service(hoursmall,hourtall,hournum_color.red,hournum_color.green,hournum_color.blue);
+
+minute_hand = minute() *2;
 
   //now lets draw the clock
 
-hour_hand = hour() + timezone;
+hour_hand = hour() + timezone + dayflag + timezflag;
   if (hour_hand < 0){
   hour_hand = hour_hand + 24;
 }
@@ -528,14 +1170,12 @@ if (dimflag == 1){
     storebrightness = brightness;  // save daylight brightness
     brightness = nightlevel; // set nighttime brightness
     strip.setBrightness(brightness); //commit
-    stripsecs.setBrightness(brightness);      
     }
   }
   else{
     if(brightness == nightlevel){  // if we made it out of first loop for the first time
       brightness = storebrightness;  //restore daylight brightness
       strip.setBrightness(brightness); //commit
-      stripsecs.setBrightness(brightness);      
     }
   }
 }
@@ -543,7 +1183,6 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
     if(brightness == nightlevel){  // the nighttime brightness will be set to 10
       brightness = storebrightness;  //restore daylight brightness
       strip.setBrightness(brightness); //commit
-      stripsecs.setBrightness(brightness);      
     }
   }
 
@@ -558,20 +1197,30 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
     previous_minute = minute_hand;
     minchanged = 1;
     minchangedreset = 1;
+    int tempvar = NTP.getUptime();
+    Serial.printf("minute_hand:%d \n", minute_hand);
+    Serial.printf("time server:%d \n", tempvar);
+    Serial.printf("settings heap size: %u\n", ESP.getFreeHeap()); 
   }
-
-  if (hour_hand != previous_hour) { //stuff that happens once an hour
+ if (hour_hand != previous_hour) { //stuff that happens once an hour
     previous_hour = hour_hand;
     hourchanged = 1;  //set the flag so that we can erase the previous hour in drawhands routine
+    time_t utc = now();
+    time_t local = myTZ.toLocal(utc, &tcr);
+    if (utc == local){
+      timezflag = 0;
+    }
+        if (utc != local){
+      timezflag = -1;
+    }
   }
 
   if (second_hand != previous_second) { // stuff that happens once a second
     previous_second = second_hand;
     secchanged = 1;
-   // Serial.printf("hour_hand:%d \n", hour_hand);
-   // Serial.printf("hour():%d \n", hour());
-   // Serial.printf("timezone:%d \n", timezone);
+  //  Serial.printf("second_hand:%d \n", second_hand);
   }
+
 
   // swinging hoop clockmode
   if (clockmode == 1) {
@@ -600,9 +1249,20 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
    swinghoop();   // perpetual motion
  }
 
-// check for changes in settings and save changes to eeprom if changes have happened
+
   
-  sprintf(current_state, "STA|%2d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d", mode, strip.getMode(), ws2812fx_speed, brightness, main_color.red, main_color.green, main_color.blue, hournum_color.red, hournum_color.green, hournum_color.blue, sec_color.red, sec_color.green, sec_color.blue, sweep_color.red, sweep_color.green, sweep_color.blue, min_color.red, min_color.green, min_color.blue,clockmode,dimflag, arcflag, dayflag, timezone);
+  }
+
+  #ifdef ENABLE_STATE_SAVE_SPIFFS
+    if (updateStateFS) {
+      (writeStateFS()) ? DBG_OUTPUT_PORT.println(" Success!") : DBG_OUTPUT_PORT.println(" Failure!");
+    }
+  #endif
+
+  #ifdef ENABLE_STATE_SAVE_EEPROM
+    // Check for state changes
+
+  sprintf(current_state, "STA|%2d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d", mode, strip.getMode(), ws2812fx_speed, brightness, main_color.red, main_color.green, main_color.blue, hournum_color.red, hournum_color.green, hournum_color.blue, sec_color.red, sec_color.green, sec_color.blue, sweep_color.red, sweep_color.green, sweep_color.blue, min_color.red, min_color.green, min_color.blue, clockmode,dimflag, arcflag, dayflag, timezone);
   
   if (strcmp(current_state, last_state) != 0) {
     
@@ -615,19 +1275,11 @@ else{ // perhaps the dim setting is turned off at night.  We need to restore day
     time_statechange = 0;
     state_save_requested = false;
 
-    writeEEPROM(256, 128, last_state); // 256 --> last_state (reserved 32 bytes)
-    EEPROM.commit();
+   writeEEPROM(256, 128, last_state); // 256 --> last_state (reserved 32 bytes)
+   EEPROM.commit();
     DBG_OUTPUT_PORT.printf("STATE CHANGED: %s / %s\n", last_state, current_state);
   }
 
 
-
+  #endif
 }
-
-
-
-
-
-
-
-

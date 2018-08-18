@@ -1,3 +1,21 @@
+// ***************************************************************************
+// Color modes
+// ***************************************************************************
+
+int dipInterval = 10;
+int darkTime = 250;
+unsigned long currentDipTime;
+unsigned long dipStartTime;
+unsigned long currentMillis;
+int ledState = LOW;
+long previousMillis = 0; 
+int led = 5;
+int interval = 2000;
+int twitch = 50;
+int dipCount = 0;
+int analogLevel = 100;
+boolean timeToDip = false;
+int ledStates[NUMLEDS];
 float accvar = 200;
 int nestloop = 0;
 int directionflag = 0;
@@ -6,28 +24,16 @@ int negledinc = 0;
 int tailinc =0;
 int ledskip = 0;
 int ledoffset = 0;
-int dipInterval = 10;
-int darkTime = 250;
 int firstsecond = 1;
-long previousMillis = 0;        // will store last time LED was updated
-long interval = 0;           // interval at which to blink (milliseconds)
-int ledState = LOW;
 int sinwave = 0;   // pendulum sinwave integer
 int penduluminc = 30;  // pendulum led incrementor
 int swingflag = 1; // toggle pendlum back and forth.
-int twitch = 50;
-int dipCount = 0;
-int analogLevel = 100;
-boolean timeToDip = false;
-int ledStates[NUMLEDS];
-int ledinc = 0, growprogress = 0;
+int growprogress = 0;
 int Red, Green, Blue;
 int LEDrmin,LEDgmin,LEDbmin;
-int piloop = 0;
-int piloop1 = 0;
-int piindex = 0;
 int intervalone = 400;
- char pi[] = "14159265358979323846264338327950288419716939937510";
+int ledinc = 0;
+
 
 void restoresettings(){
   String saved_state_string = readEEPROM(256, 128);
@@ -86,73 +92,96 @@ void restoresettings(){
     strip.setMode(ws2812fx_mode);
     strip.setSpeed(convertSpeed(ws2812fx_speed));
     strip.setBrightness(brightness);
-    stripsecs.setBrightness(brightness);
     strip.setColor(main_color.red, main_color.green, main_color.blue);
   }
 sprintf(last_state, "STA|%2d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d", mode, ws2812fx_mode, ws2812fx_speed, brightness, main_color.red, main_color.green, main_color.blue, hournum_color.red, hournum_color.green, hournum_color.blue, sec_color.red, sec_color.green, sec_color.blue, sweep_color.red, sweep_color.green, sweep_color.blue, min_color.red, min_color.green, min_color.blue, clockmode, dimflag, arcflag, dayflag,timezone);
 
 }
-// ***************************************************************************
-// Clear Clock Routines
-// ***************************************************************************
+
+
+void hsb2rgbAN1(uint16_t index, uint8_t sat, uint8_t bright, uint8_t myled) {
+    // Source: https://blog.adafruit.com/2012/03/14/constant-brightness-hsb-to-rgb-algorithm/
+    uint8_t temp[5], n = (index >> 8) % 3;
+    temp[0] = temp[3] = (uint8_t)((                                         (sat ^ 255)  * bright) / 255);
+    temp[1] = temp[4] = (uint8_t)((((( (index & 255)        * sat) / 255) + (sat ^ 255)) * bright) / 255);
+    temp[2] =           (uint8_t)(((((((index & 255) ^ 255) * sat) / 255) + (sat ^ 255)) * bright) / 255);
+
+    strip.setPixelColor(myled, temp[n + 2], temp[n + 1], temp[n]);
+}
+
+
+void updateLed (int led, int brightness) {
+	ledStates[led] = brightness;
+	
+	for (int i=0; i<NUMLEDS; i++)
+	{
+		uint16_t index = (i%3 == 0) ? 400 : random(0,767);
+		hsb2rgbAN1(index, 200, ledStates[i], i);
+	}
+	strip.show();
+}
+
+
 void clearHandsRing() {
-  for (byte i = 0; i <= NUMLEDSECS; i++) 
-      stripsecs.setPixelColor(i, stripsecs.Color(0, 0, 0));
+  for (byte i = 0; i <= NUMLEDSECS; i++) {
+      strip.setPixelColor(i+stripoffset, 0, 0, 0);
+      
+}
     }
 void clearNumbers() {
       for (byte i = 0; i <= NUMLEDS; i++) {
-        strip.setPixelColor(i, strip.Color(0, 0, 0));
+        
+        strip.setPixelColor(i, 0, 0, 0);
+        
       }
     }
 
-// ************************************************************************************
-// Main pixel movement routine.
-// *************************************************************************************
 
 void nextpixels(int startarc = 0, int endarc = 0, int ledindex = 0, int colorred = 0, int colorgreen = 0, int colorblue = 0){ //routine used to advance or decay pixels keeping immunity for h/s/m hands
-  
-  clearHandsRing();    
-
-  if(startarc == endarc){  // if the values are identical only the dot, no arc
-   stripsecs.setPixelColor(ledindex, stripsecs.Color(colorred,colorgreen,colorblue)); 
+clearHandsRing();    
+if(startarc == endarc){  // if the values are identical only the dot, no arc
+   strip.setPixelColor(ledindex+stripoffset,colorred,colorgreen,colorblue); 
   }
   else{
   if (startarc<endarc){  // the arc is normal - doesn't wrap
     for(int arc = startarc; arc < endarc; arc=arc+2){
-      stripsecs.setPixelColor(arc, stripsecs.Color(sweep_color.red,sweep_color.green,sweep_color.blue)); 
+      
+      strip.setPixelColor(arc+stripoffset, sweep_color.red,sweep_color.green,sweep_color.blue); 
     }
   }
   else{  // the arc passes the 120 pixel mark and wraps
 
 for(int arc = startarc; arc < 122; arc=arc+2){  // draw the first half of the arc
-   stripsecs.setPixelColor(arc, stripsecs.Color(sweep_color.red,sweep_color.green,sweep_color.blue)); 
-    }
+   strip.setPixelColor(arc+stripoffset, sweep_color.red,sweep_color.green,sweep_color.blue); 
+}
 
 for(int arc = 0; arc < endarc; arc=arc+2){  //draw the second half of the arc
-      stripsecs.setPixelColor(arc, stripsecs.Color(sweep_color.red,sweep_color.green,sweep_color.blue)); 
+  
+      strip.setPixelColor(arc+stripoffset, sweep_color.red,sweep_color.green,sweep_color.blue); 
     }
   }
 }
 
   if (arcflag == 1){  // if arcflag is set, draw the arc 
     for(int arc = 0; arc < minute_hand; arc=arc+2){
-      stripsecs.setPixelColor(arc, stripsecs.Color(sweep_color.red,sweep_color.green,sweep_color.blue)); 
+      
+      strip.setPixelColor(arc+stripoffset, sweep_color.red,sweep_color.green,sweep_color.blue); 
     }
   }
 
 if(ledindex>0){  //set a specific pixel
-  stripsecs.setPixelColor(ledindex, stripsecs.Color(colorred,colorgreen,colorblue)); 
+  
+  strip.setPixelColor(ledindex+stripoffset, colorred,colorgreen,colorblue); 
 }
 
 // now draw the hands
  
-stripsecs.setPixelColor(minute_hand, stripsecs.Color(min_color.red,min_color.green,min_color.blue));
+strip.setPixelColor(minute_hand+stripoffset, min_color.red,min_color.green,min_color.blue);
 if(secondhandstate == 1){
-stripsecs.setPixelColor(second_hand, stripsecs.Color(sec_color.red,sec_color.green,sec_color.blue));
+strip.setPixelColor(second_hand+stripoffset, sec_color.red,sec_color.green,sec_color.blue);
 }
 
-
-stripsecs.show();  //show it  
+strip.show();  //show it  
 
 
 if(hourchanged == 1 ){  // if the hour event has changed, update the numbers
@@ -161,41 +190,53 @@ if(hourchanged == 1 ){  // if the hour event has changed, update the numbers
      Serial.printf("hour_hand:%d \n", hour_hand); 
    //   Serial.printf("hournum_color:%d \n",);     
       if (hour_hand == 5*2) {  //one oclock
-        strip.sendtime(-1,4,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = -1;
+      hourtall =4;
       }
       if (hour_hand == 10*2) {  //two oclock
-        strip.sendtime(3,12,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 3;
+      hourtall = 12;
       }
       if (hour_hand == 15*2) { //three
 
-        strip.sendtime(11,21,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 11;
+      hourtall = 21;
       }
       if (hour_hand == 20*2) {  //four
-        strip.sendtime(20,28,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 20;
+      hourtall = 28;
       }
       if (hour_hand == 25*2) { // five
-        strip.sendtime(27,37,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 27;
+      hourtall = 37;
       }
       if (hour_hand == 30*2) { //six
-        strip.sendtime(36,46,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 36;
+      hourtall = 46;
       } 
       if (hour_hand == 35*2) {  //seven
-        strip.sendtime(45,51,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 45;
+      hourtall = 51; 
       }
       if (hour_hand == 40*2) {  //eight
-        strip.sendtime(50,60,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 50;
+      hourtall = 60;
       }
       if (hour_hand == 45*2) {  //nine
-        strip.sendtime(59,68,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 59;
+      hourtall = 68;
       }
       if (hour_hand == 50*2) { //ten
-        strip.sendtime(67,80,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 67;
+      hourtall = 80;
       }
       if (hour_hand == 55*2) {  //eleven
-        strip.sendtime(79,88,hournum_color.red,hournum_color.green,hournum_color.blue);
+      hoursmall = 79;
+      hourtall = 88;
       }
       if (hour_hand == 60*2) { //twelve
-        strip.sendtime(87,100,hournum_color.red,hournum_color.green,hour_color.blue);
+      hoursmall = 87;
+      hourtall = 100;
       }      
     strip.show();  // now show it
   }
@@ -204,7 +245,6 @@ if(hourchanged == 1 ){  // if the hour event has changed, update the numbers
 // *************************************************************************************
 // Clock Modes    
 // *************************************************************************************
-
 
 void swinghoop(){
   if (ledinc == 120) { //if we made it around the circle
@@ -291,18 +331,18 @@ if (minchanged == 0){
 if (directionflag == 1){
 for(int x=0; x<12; x++){
  int lednumber = x*10-2+tailinc;
- stripsecs.setPixelColor(lednumber,strip.Color(alt_color.red,alt_color.green,alt_color.blue));
+ strip.setPixelColor(lednumber+stripoffset,alt_color.red,alt_color.green,alt_color.blue);
 }
 }
 
 if (directionflag == 0){
 for(int x=0; x<12; x++){
  int lednumber = x*10-2+tailinc;
- stripsecs.setPixelColor(lednumber,strip.Color(0,0,0));
+ strip.setPixelColor(lednumber+stripoffset,0,0,0);
   }
 }
 
-  stripsecs.show();
+  strip.show();
   tailinc = tailinc + 2;
   accvar = accvar - (accvar * 0.09);  //decrease the delay (ie. accelerate)    
   interval = accvar;  //set the interval
@@ -377,9 +417,9 @@ if (minchanged == 0){
 
 
 
-  void bumpme(){
-    unsigned long currentMillis = millis();  // get the current clock time
-    if(currentMillis - previousMillis > interval) {  // has it been long enough?
+void bumpme(){
+unsigned long currentMillis = millis();  // get the current clock time
+  if(currentMillis - previousMillis > interval) {  // has it been long enough?
     previousMillis = currentMillis;   // if yes reset the timer
     if (minchanged == 1) {  // are we at a minute event?
         if (minchangedreset == 1){ // if this is the first time entering the loop, reset the key variables.
@@ -390,7 +430,7 @@ if (minchanged == 0){
     }
 
 
-    if (nestloop == 0){ // we are in the first loop
+ if (nestloop == 0){ // we are in the first loop
       growprogress = growprogress + 2;  //++
        if (growprogress < 120){   // first pass around the circle
         nextpixels(0,growprogress);
@@ -496,15 +536,111 @@ void pendulum(){
 }
 }
 
+
+
+
+// See: http://forum.mysensors.org/topic/85/phoneytv-for-vera-is-here/13
+void tv() {
+	checkForRequests();
+	if (exit_func) {
+		exit_func = false;
+		return;
+	}
+	
+	if (timeToDip == false)
+	{
+		currentMillis = millis();
+		if(currentMillis-previousMillis > interval) 
+		{
+			previousMillis = currentMillis;
+			interval = random(750,4001);//Adjusts the interval for more/less frequent random light changes
+			twitch = random(40,100);// Twitch provides motion effect but can be a bit much if too high
+			dipCount = dipCount++;
+		}
+		if(currentMillis-previousMillis<twitch)
+		{
+			led=random(0, (strip.numPixels()-1));
+			analogLevel=random(50,255);// set the range of the 3 pwm leds
+			ledState = ledState == LOW ? HIGH: LOW; // if the LED is off turn it on and vice-versa:
+			
+			updateLed(led, (ledState) ? 255 : 0);
+			
+			if (dipCount > dipInterval)
+			{ 
+				DBG_OUTPUT_PORT.println("dip");
+				timeToDip = true;
+				dipCount = 0;
+				dipStartTime = millis();
+				darkTime = random(50,150);
+				dipInterval = random(5,250);// cycles of flicker
+			}
+			//strip.show();
+		} 
+	}
+	else
+	{
+		DBG_OUTPUT_PORT.println("Dip Time");
+		currentDipTime = millis();
+		if (currentDipTime - dipStartTime < darkTime)
+		{
+			for (int i=3; i<strip.numPixels(); i++)
+			{
+				updateLed(i, 0);
+			}
+		}
+		else
+		{
+			timeToDip = false;
+		}
+		strip.show();
+	}
+}
+
+
+
+time_t compileTime()
+{
+    const time_t FUDGE(10);     // fudge factor to allow for compile time (seconds, YMMV)
+    const char *compDate = __DATE__, *compTime = __TIME__, *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    char chMon[3], *m;
+    tmElements_t tm;
+
+    strncpy(chMon, compDate, 3);
+    chMon[3] = '\0';
+    m = strstr(months, chMon);
+    tm.Month = ((m - months) / 3 + 1);
+
+    tm.Day = atoi(compDate + 4);
+    tm.Year = atoi(compDate + 7) - 1970;
+    tm.Hour = atoi(compTime);
+    tm.Minute = atoi(compTime + 3);
+    tm.Second = atoi(compTime + 6);
+    time_t t = makeTime(tm);
+    return t + FUDGE;           // add fudge factor to allow for compile time
+    
+}
+
+// format and print a time_t value, with a time zone appended.
+void printDateTime(time_t t, const char *tz)
+{
+    char buf[32];
+    char m[4];    // temporary storage for month string (DateStrings.cpp uses shared buffer)
+    strcpy(m, monthShortStr(month(t)));
+    sprintf(buf, "%.2d:%.2d:%.2d %s %.2d %s %d %s",
+        hour(t), minute(t), second(t), dayShortStr(weekday(t)), day(t), m, year(t), tz);
+    Serial.println(buf);
+}
+
+
 void startup(){
- accvar = 50; // reset acceleration variable
- clearHandsRing();
- clearNumbers();
- ledinc = -2;
+accvar = 50; // reset acceleration variable
+clearHandsRing();
+clearNumbers();
+int ledinc = 0;
  for(int y=0; y<122; ++y){
   ledinc++;
-  stripsecs.setPixelColor(ledinc, stripsecs.Color(0,0,200));
-  stripsecs.show();
+  strip.setPixelColor(ledinc+stripoffset, 0,0,200);
+  strip.show();
     if (ledinc < 60) { // we've got the halfway point.  Now decelarate
     accvar = accvar - (accvar * 0.09);
   }
@@ -516,11 +652,10 @@ void startup(){
 
 for(int z=200; z > 0; z=z-1){
   for (byte i = 0; i <= NUMLEDSECS; i++) {
-    stripsecs.setPixelColor(i, stripsecs.Color(0, 0, z));
+    strip.setPixelColor(i+stripoffset, 0, 0, z);
   }
+  strip.show();
 
-  stripsecs.show();
-  delay(2);
 
 }
 clearHandsRing();
@@ -529,153 +664,87 @@ minchanged = 1;
 }
 
 
-void hsb2rgbAN1(uint16_t index, uint8_t sat, uint8_t bright, uint8_t myled) {
-  // Source: https://blog.adafruit.com/2012/03/14/constant-brightness-hsb-to-rgb-algorithm/
-  uint8_t temp[5], n = (index >> 8) % 3;
-  temp[0] = temp[3] = (uint8_t)((                                         (sat ^ 255)  * bright) / 255);
-  temp[1] = temp[4] = (uint8_t)((((( (index & 255)        * sat) / 255) + (sat ^ 255)) * bright) / 255);
-  temp[2] =           (uint8_t)(((((((index & 255) ^ 255) * sat) / 255) + (sat ^ 255)) * bright) / 255);
-
-  strip.setPixelColor(myled, temp[n + 2], temp[n + 1], temp[n]);
-}
-
-
-void updateLed (int led, int brightness) {
-  ledStates[led] = brightness;
-
-  for (int i = 0; i < NUMLEDS; i++)
-  {
-    uint16_t index = (i % 3 == 0) ? 400 : random(0, 767);
-    hsb2rgbAN1(index, 200, ledStates[i], i);
-  }
-  strip.show();
-}
-
-static void temp(uint16_t t, uint16_t high, uint16_t low) {
-  Red = 0;   //reset the colors
-  Blue = 255;
-  clearHandsRing();
-  for (uint16_t i = 0; i < t; i++) { // Begin with Full Blue and Begin to Fade to full red
-    strip.setPixelColor(i, Red = Red + 4, 0, Blue = Blue - 4); // increment by 4
-    strip.show();
-    delay(25);
-  }
-
-  clearHandsRing();
-  strip.setPixelColor(t, 0, 255, 0); //set the target temperature green
-  strip.show();
-  int incr = t + 1;
-  int incrminus = t - 1;
-  int limitlow = t - low;
-  int limithigh = high - t;
-  int limit = 0;
-
-  if (limitlow > limithigh) { //find out the greater delta with respect to target temp
-    limit = limitlow;
-  }
-  else {
-    limit = limithigh;
-  }
-  for (uint16_t i = 0; i < limit; i++) { //use that delta as the end parameter in the loop.
-    if (limitlow > i) {
-      strip.setPixelColor(incr++, 255, 0, 0); // if we haven't reached the low keep drawing
-      strip.show();
-      delay(50);
-    }
-    if (limithigh > i) {
-      strip.setPixelColor(incrminus--, 0, 0, 255); // if we haven't reached the high keep drawing
-      strip.show();
-      delay(50);
-    }
-  }
-  delay(1500);
-  clearHandsRing();
-}
-
-void weather() {
-  temp(30, 35, 5);
-}
-
-
-void eventcall() {
-  weather();
-}
-
-
-// See: http://forum.mysensors.org/topic/85/phoneytv-for-vera-is-here/13
-
 
 void one() {         // LED's that make 1 o'clock
 for (byte i=0; i<=3;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
+  
   strip.show();
 }
 }
 
 void two() {         // LED's that make 2 o'clock
 for (byte i=4; i<=11;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void three() {         // LED's that make 3 o'clock
 for (byte i=12; i<=20;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void four() {         // LED's that make 4 o'clock
 for (byte i=21; i<=27;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void five() {         // LED's that make 5 o'clock
 for (byte i=28; i<=36;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void six() {         // LED's that make 6 o'clock
 for (byte i=37; i<=45;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 void seven() {         // LED's that make 7 o'clock
 for (byte i=46; i<=50;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);
 }
+
 strip.show();
 }
 
 void eight() {         // LED's that make 8 o'clock
 for (byte i=51; i<=59;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 void nine() {         // LED's that make 9 o'clock
 for (byte i=60; i<=67;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void ten() {         // LED's that make 10 o'clock
 for (byte i=68; i<=79;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
 
 strip.show();
@@ -683,91 +752,36 @@ strip.show();
 
 void eleven() {         // LED's that make 11 o'clock
 for (byte i=80; i<=87;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();    
 }
 
 void twelve() {         // LED's that make 12 o'clock
 for (byte i=88; i<=99;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 
 }
 
 void zero(){         // LED's that make 10 o'clock
 for (byte i=72; i<=79;i++) {
-  strip.setPixelColor(i,strip.Color(main_color.red,main_color.green,main_color.blue));  
+  strip.setPixelColor(i,main_color.red,main_color.green,main_color.blue);  
 }
+
 strip.show();
 }
 
 void dot(){
   for(int x=1; x<12; x++){
-    stripsecs.setPixelColor(x*10-2,strip.Color(main_color.red,main_color.green,main_color.blue));
+    strip.setPixelColor(x*10-2+stripoffset,main_color.red,main_color.green,main_color.blue);
   }
-  stripsecs.show();
+  
+strip.show();
 }
 
 
 
-void tv() {
-unsigned long currentMillis = millis();
-if(currentMillis - previousMillis > intervalone) {
-    previousMillis = currentMillis;   
-if(piloop == 0){
-      strip.setColor(0, 0, 0);
-      strip.setMode(FX_MODE_STATIC);
-      mode = HOLD;
-three();
-delay(500);
-dot();
-delay(500);
-piloop = 1;
-piindex = 0;
-}
-else{
-piindex = piindex + 1;
-if(piindex < 50){
-
-if(pi[piindex]=='0'){
-  zero();
-}
-if(pi[piindex]=='1'){
-  one();
-}
-if(pi[piindex]=='2'){
-  two();
-}
-if(pi[piindex]=='3'){
-  three();
-}
-if(pi[piindex]=='4'){
-  four();
-}
-if(pi[piindex]=='5'){
-  five();
-}
-if(pi[piindex]=='6'){
-  six();
-}
-if(pi[piindex]=='7'){
-  seven();
-}
-if(pi[piindex]=='8'){
-  eight();
-}
-if(pi[piindex]=='9'){
-  nine();
-}
-}
-else{
-  piindex = 0;
-  piloop = 0;
-
-}
-}
-}
-
-}
