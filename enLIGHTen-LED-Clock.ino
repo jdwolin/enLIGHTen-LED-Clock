@@ -85,7 +85,6 @@ ESP8266HTTPUpdateServer httpUpdater;
 // https://github.com/debsahu/NeoAnimationFX
 #include "NeoAnimationFX.h"
 #define NEOMETHOD NeoPBBGRB800
-
 NEOMETHOD neoStrip(220);
 NeoAnimationFX<NEOMETHOD> strip(neoStrip);
 
