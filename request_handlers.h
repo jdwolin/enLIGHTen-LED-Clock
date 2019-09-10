@@ -912,12 +912,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       }
 
       if (strcmp((char *)payload, "daylighton") == 0 ) {
-        dayflag = -2;
+        dayflag = 1;
         webSocket.sendTXT(num, "OK");
       }
 
       if (strcmp((char *)payload, "daylightoff") == 0 ) {
-        dayflag = -1;
+        dayflag = 0;
         webSocket.sendTXT(num, "OK");
       }
 
